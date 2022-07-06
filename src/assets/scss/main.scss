@@ -1,4 +1,4 @@
-.main_bg {
+.main-bg {
     @apply bg-gray-100 box-border py-10;
 }
 .content {
@@ -6,10 +6,10 @@
     margin: auto;
     width: 1000px;
 }
-.sec_gap {
+.sec-gap {
     margin-bottom: 2rem !important;
 }
-.full_button {
+.full-button {
     @apply p-2 rounded w-full cursor-pointer block;
 }
 @media screen and (max-width: 1024px) {

@@ -34,7 +34,7 @@
             </div>
             <div class="mt-3">
                 <a class="text-orange-400 block mr-3 text-sm" href="">忘記密碼 Forgot Password</a>
-                <div class="text-sm">賽事問題請洽各校隊，系統操作問題請洽<a class="text-orange-400" href="">中山田徑</a></div>
+                <div class="text-sm">賽事問題請洽各校隊，系統操作問題請洽<a class="text-orange-400" href="https://www.facebook.com/NSYSUAthletics" target="_blank">中山田徑</a></div>
             </div>
         </div>
     </div>
@@ -64,6 +64,9 @@
                 </div>
                 <div v-show="identity!=''" class="border-2 rounded p-3">
                     <IndividualSignup v-if="identity=='idv'"></IndividualSignup>
+                    <StudentSignup v-if="identity=='stu'"></StudentSignup>
+                    <SchoolSignup v-if="identity=='sch'"></SchoolSignup>
+                    <GroupSignup v-if="identity=='grp'"></GroupSignup>
                 </div>
             </template>
     </SmallModal>
@@ -73,6 +76,9 @@
 import { defineComponent, ref } from 'vue';
 import SmallModal from '@/components/SmallModal.vue';
 import IndividualSignup from '@/components/login/IndividualSignup.vue';
+import StudentSignup from '@/components/login/StudentSignup.vue';
+import SchoolSignup from '@/components/login/SchoolSignup.vue';
+import GroupSignup from '@/components/login/GroupSignup.vue';
 
 export default defineComponent({
     setup() {
@@ -89,6 +95,9 @@ export default defineComponent({
     components: {
         SmallModal,
         IndividualSignup,
+        StudentSignup,
+        SchoolSignup,
+        GroupSignup,
     },
 });
 </script>

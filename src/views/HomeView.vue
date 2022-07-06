@@ -11,3 +11,5 @@ export default defineComponent({
     },
 });
 </script>
+
+<style lang="scss" src="@/assets/scss/main.scss"></style>

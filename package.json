@@ -15,6 +15,7 @@
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
+    "vue-select": "^4.0.0-beta.3",
     "vuex": "^4.0.0"
   },
   "devDependencies": {
@@ -61,8 +62,19 @@
       "ecmaVersion": 2020
     },
     "rules": {
-      "indent": ["warn", 4],
-      "max-len": ["off", {"code": 200, "tabWidth": 4, "ignoreUrls": true}],
+      "indent": [
+        "warn",
+        4
+      ],
+      "max-len": [
+        "off",
+        {
+          "code": 200,
+          "tabWidth": 4,
+          "ignoreUrls": true
+        }
+      ],
+      "no-plusplus": ["off", { "allowForLoopAfterthoughts": true }],
       "@typescript-eslint/no-explicit-any": "off",
       "vuejs-accessibility/click-events-have-key-events": 0,
       "vuejs-accessibility/label-has-for": 0,
