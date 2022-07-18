@@ -141,7 +141,7 @@ export default defineComponent({
         }
         // data
         const organization = ref('');
-        const city = ref('');
+        const city = ref('KH');
         return {
             nowPage,
             prevPage,
