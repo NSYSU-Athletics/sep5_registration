@@ -1,0 +1,24 @@
+.arrow-button {
+  @apply text-white rounded p-2 w-[160px] m-2 text-center bg-orange-400;
+  transition: all 0.3s;
+  span {
+    @apply cursor-pointer inline-block text-xl relative;
+    transition: 0.3s;
+  }
+  span:after {
+    content: '❯';
+    @apply absolute opacity-0 top-0 -right-5;
+    transition: 0.3s;
+  }
+}
+.arrow-button:hover span {
+  @apply pr-5;
+}
+.arrow-button:hover span:after {
+  @apply opacity-100 right-0;
+}
+.grid-box {
+  div {
+    @apply text-xl font-medium p-5 bg-white shadow;
+  }
+}

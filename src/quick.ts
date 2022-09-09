@@ -78,7 +78,7 @@ export class QuickFetch extends Config {
             .catch((err) => { this.ErrHdl(err); });
     }
 
-    public Post(dataset:any):any {
+    public Post(dataset:any = undefined):any {
         return axios.post(this.url, dataset, { headers: this.headers })
             .then((res) => res.data)
             .catch((err) => { this.ErrHdl(err); });
@@ -140,19 +140,13 @@ export class QuickData {
         this.store.commit('changeLanguage', langCode);
     }
 
-    public getLang() {
-        return this.store.state.language;
-    }
-
-    public setYear(year: number) {
-        this.store.commit('setYear', year);
-    }
-
     public Alert(message: string|number) {
         this.store.commit('setMessageBox', message);
     }
-
-    public getYear() {
-        return this.store.state.year;
+    public Confirm(message: string|number) {
+        this.store.commit('setConfirmBox', message);
+    }
+    public ResetConfirm(){
+        this.store.commit('setConfirmAnswer', '');
     }
 }

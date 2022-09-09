@@ -8,19 +8,21 @@
                 <tr>
                     <td class="label">Email：</td>
                     <td>
-                        <input type="email">
+                        <input type="email" v-model="data.account" @blur="exist">
+                        <div v-if="data.account.length>0 && !errorList.account.format" class="warning">Email格式錯誤</div>
+                    <div v-if="data.account.length>0 && !errorList.account.unique" class="warning">Email已存在</div>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">真實姓名：</td>
                     <td>
-                        <input type="text">
+                        <input type="text" v-model="data.name">
                     </td>
                 </tr>
                 <tr>
                     <td class="label">系所：</td>
                     <td>
-                        <v-select class="cursor-pointer" :options="deptList" :reduce="department => department.dept_id" v-model="department" label="dept_ch">
+                        <v-select class="cursor-pointer" :options="deptList" :reduce="department => department.dept_id" v-model="data.dept_id" label="dept_ch">
                         <template v-slot:no-options="{ search, searching }">
                             <template v-if="searching">找不到 <em>{{ search }}</em>。
                             </template>
@@ -30,21 +32,24 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">聯絡電話：</td>
+                    <td class="label">手機號碼：</td>
                     <td>
-                        <input type="text">
+                        <input type="tel" v-model="data.phone">
+                        <div v-if="data.phone.length>0 && !errorList.phone.format" class="warning">手機格式錯誤</div>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">密碼：</td>
                     <td>
-                        <input type="password">
+                        <input type="password" v-model="data.password">
+                        <div v-if="data.password.length>0 && !errorList.password.format" class="warning">密碼需格有大小寫字母與數字，並至少8個字元</div>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">確認密碼：</td>
                     <td>
-                        <input type="password">
+                        <input type="password" v-model="data.password_confirm">
+                        <div v-if="data.password_confirm.length>0 && !errorList.passwordConfirm.same" class="warning">兩次輸入密碼不相同</div>
                     </td>
                 </tr>
             </table>
@@ -75,27 +80,114 @@
                 <hr class="my-2">
             </div>
             <div class="mt-3">
-                <button class="full-button bg-orange-400 text-white">註冊</button>
+                <button class="full-button bg-orange-400 text-white" @click="submitAll">註冊</button>
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import {
+    defineComponent, reactive, watch, ref,
+} from 'vue';
 import { QuickData, QuickFetch } from '@/quick';
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 
 export default defineComponent({
-    setup() {
+    setup(props, context) {
         const qf = new QuickFetch();
         const qd = new QuickData();
         const deptList: any = ref([]);
         // get dept list
         qf.Url('dept-list').GetAll(deptList);
+        // data
+        const data = reactive({
+            account: '',
+            name: '',
+            dept_id: '',
+            phone: '',
+            password: '',
+            password_confirm: '',
+            image: '',
+        });
+        const errorList = reactive({
+            account: {
+                filled: false,
+                format: true,
+                unique: true,
+            },
+            name: {
+                filled: false,
+            },
+            phone: {
+                filled: false,
+                format: true,
+            },
+            password: {
+                filled: false,
+                format: true,
+            },
+            passwordConfirm: {
+                filled: false,
+                same: true,
+            },
+        });
+        watch(data, () => {
+            errorList.account.filled = data.account.length > 0;
+            // eslint-disable-next-line
+            errorList.account.format = (/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/.test(data.account));
+            errorList.name.filled = data.name.length > 0;
+            errorList.phone.filled = data.phone.length > 0;
+            errorList.phone.format = (/^09[0-9]{8}$/.test(data.phone));
+            errorList.password.filled = data.password.length > 0;
+            errorList.password.format = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/.test(data.password);
+            errorList.passwordConfirm.same = data.password === data.password_confirm;
+            errorList.passwordConfirm.filled = data.password_confirm.length > 0;
+        });
+
+        function exist() {
+            qf.Url(`auth/student/exist/${data.account}`).Get().then((res: any) => {
+                if (res.message === true) {
+                    errorList.account.unique = false;
+                } else {
+                    errorList.account.unique = true;
+                }
+            });
+        }
+        function submitAll() {
+            // eslint-disable-next-line no-restricted-syntax
+            for (const item of Object.entries(errorList)) {
+                // eslint-disable-next-line no-restricted-syntax
+                for (const error of Object.entries(item[1])) {
+                    if (error[1] === false) {
+                        if (error[0] === 'filled') {
+                            qd.Alert('請確認所有欄位皆已填寫');
+                        } else {
+                            qd.Alert('請確認輸入的內容');
+                        }
+                        return;
+                    }
+                }
+            }
+            const temp: any = JSON.parse(JSON.stringify(data));
+            delete temp.password_confirm;
+            qf.Url('auth/student/register').Post(temp).then((res: any) => {
+                if (res.message === 'done') {
+                    qd.Alert('註冊成功');
+                    context.emit('refresh');
+                    context.emit('close_modal');
+                    data.account = '';
+                    data.name = '';
+                    data.dept_id = '';
+                    data.password = '';
+                    data.password_confirm = '';
+                    data.phone = '';
+                }
+            });
+        }
+        // image handler
         const imageUrl = ref('');
-        let image = '';
         function loadImage(event: any) {
             if (event.target.files[0].size > 3000000) {
                 qd.Alert('檔案過大 File size is too large');
@@ -104,20 +196,20 @@ export default defineComponent({
                 imageUrl.value = URL.createObjectURL(event.target.files[0]);
                 reader.onload = () => {
                     const base64String: string = reader.result.replace('data:', '').replace(/^.+,/, '');
-                    image = `data:image/png;base64, ${base64String}`;
+                    data.image = `data:image/png;base64, ${base64String}`;
                 };
                 reader.readAsDataURL(event.target.files[0]);
             }
         }
-        // data
-        const department: any = ref('');
         return {
             page: ref(1),
             imageUrl,
             loadImage,
             deptList,
-            // data
-            department,
+            data,
+            errorList,
+            submitAll,
+            exist,
         };
     },
     components: {

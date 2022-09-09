@@ -1,0 +1,12 @@
+.button {
+  @apply inline-block text-white px-2 py-1 rounded m-1 bg-orange-400 hover:bg-orange-300 duration-200;
+  &.button-red {
+    @apply bg-red-600 hover:bg-red-500;
+  }
+  &.button-green {
+    @apply bg-green-600 hover:bg-green-600;
+  }
+  &.w-full {
+    @apply p-2;
+  }
+}
