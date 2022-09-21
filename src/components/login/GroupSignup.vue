@@ -232,9 +232,12 @@ export default defineComponent({
             account: '',
             name: '',
             org_id: '',
+            dept_id: null,
             phone: '',
             password: '',
             password_confirm: '',
+            image: null,
+            verification: 1,
         });
         const errorList = reactive({
             account: {

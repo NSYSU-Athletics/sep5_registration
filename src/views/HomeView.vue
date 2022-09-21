@@ -7,7 +7,7 @@
                 <div class="text-xs">Sports Events Registration System</div>
             </div>
             <div class="flex-grow"></div>
-            <div class="nav-button">帳號</div>
+            <!--<div class="nav-button">帳號</div>-->
             <div class="nav-button" @click="logout">登出</div>
         </div>
         <div class="flex-grow bg-gray-100">
@@ -26,16 +26,8 @@ export default defineComponent({
         const qf = new QuickFetch();
         const qd = new QuickData();
         const router = useRouter();
-        const userData: any = ref({});
         function logout() {
-            const userStorage = JSON.parse(localStorage.sep5_reg_data);
-            let url = '';
-            if (userStorage.type === 'stu') {
-                url = 'auth/student/logout';
-            } else {
-                url = 'auth/user/logout';
-            }
-            qf.Url(url).Post().then((res: any) => {
+            qf.Url('auth/user/logout').Post().then((res: any) => {
                 if (res.message === 'done') {
                     localStorage.removeItem('sep5_reg_token');
                     localStorage.removeItem('sep5_reg_data');
@@ -46,7 +38,6 @@ export default defineComponent({
             });
         }
         return {
-            userData,
             logout,
         };
     },

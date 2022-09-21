@@ -26,6 +26,13 @@ export class QuickFetch extends Config {
     // error handler
     private ErrHdl(error: any) {
         if (error.response) {
+            if(error.response.data.hasOwnProperty('message')){
+                if(error.response.data.message=='Unauthenticated.') {
+                    localStorage.removeItem('sep5_reg_token');
+                    localStorage.removeItem('sep5_reg_token');
+                    this.router.push('/login');
+                }
+            }
             this.LogError(JSON.stringify(error.response));
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx

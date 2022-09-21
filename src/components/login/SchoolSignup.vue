@@ -31,6 +31,19 @@
                 </td>
             </tr>
             <tr>
+                <td class="label">系所：</td>
+                <td>
+                    <v-select class="cursor-pointer" :options="deptList" :reduce="department => department.dept_id" v-model="data.dept_id" label="label">
+                        <template v-slot:no-options="{ search, searching }">
+                            <template v-if="searching">找不到 <em>{{ search }}</em>。
+                            </template>
+                            <div v-else-if="data.org_id.length > 0" class="opacity-50">載入中</div>
+                            <div v-else class="opacity-50">請選擇學校</div>
+                        </template>
+                    </v-select>
+                </td>
+            </tr>
+            <tr>
                 <td class="label">手機號碼：</td>
                 <td>
                     <input type="text" v-model="data.phone">
@@ -71,27 +84,29 @@ export default defineComponent({
     setup(props, context) {
         const qf = new QuickFetch();
         const qd = new QuickData();
-        const univList: any = ref([]);
-        // get dept list
-        qf.Url('univ-list').GetAll(univList).then(() => {
-            for (let i = 0; i < univList.value.length; i++) {
-                univList.value[i].label = `${univList.value[i].univ_name_ch_full} (${univList.value[i].univ_name_en})`;
-            }
-        });
         // data
         const data = reactive({
             account: '',
             name: '',
             org_id: '',
+            dept_id: '',
             phone: '',
             password: '',
             password_confirm: '',
+            image: null,
+            verification: 1,
         });
         const errorList = reactive({
             account: {
                 filled: false,
                 format: true,
                 unique: true,
+            },
+            org_id: {
+                filled: false,
+            },
+            dept_id: {
+                filled: false,
             },
             name: {
                 filled: false,
@@ -109,11 +124,36 @@ export default defineComponent({
                 same: true,
             },
         });
+        // get univ list
+        const univList: any = ref([]);
+        qf.Url('univ-list').GetAll(univList).then(() => {
+            for (let i = 0; i < univList.value.length; i++) {
+                univList.value[i].label = `${univList.value[i].univ_name_ch_full} (${univList.value[i].univ_name_en})`;
+            }
+        });
+        const deptList: any = ref([]);
+        // get dept list
+        function getDeptList() {
+            deptList.value = [];
+            qf.Url('dept-list').Get().then((res: any) => {
+                let temp: any = {};
+                for (let i = 0; i < res.length; i++) {
+                    if (res[i].univ_id === data.org_id) {
+                        temp = res[i];
+                        temp.label = `[${res[i].college_ch}] ${res[i].dept_ch}`;
+                        deptList.value.push(temp);
+                    }
+                }
+            });
+        }
+        let univTemp = '';
         watch(data, () => {
             errorList.account.filled = data.account.length > 0;
             // eslint-disable-next-line
             errorList.account.format = (/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/.test(data.account));
             errorList.name.filled = data.name.length > 0;
+            errorList.org_id.filled = data.org_id.length > 0;
+            errorList.dept_id.filled = data.dept_id.length > 0;
             errorList.phone.filled = data.phone.length > 0;
             errorList.phone.format = (/^09[0-9]{8}$/.test(data.phone));
             errorList.password.filled = data.password.length > 0;
@@ -123,6 +163,11 @@ export default defineComponent({
             if (data.org_id === 'O0000') {
                 qd.Alert('單位設定錯誤');
                 data.org_id = '';
+            }
+            if (data.org_id !== univTemp) {
+                getDeptList();
+                data.dept_id = '';
+                univTemp = data.org_id;
             }
         });
 
@@ -168,6 +213,7 @@ export default defineComponent({
         }
         return {
             univList,
+            deptList,
             // data
             data,
             errorList,

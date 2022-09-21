@@ -23,12 +23,12 @@
                     <td class="label">系所：</td>
                     <td>
                         <v-select class="cursor-pointer" :options="deptList" :reduce="department => department.dept_id" v-model="data.dept_id" label="dept_ch">
-                        <template v-slot:no-options="{ search, searching }">
-                            <template v-if="searching">找不到 <em>{{ search }}</em>。
+                            <template v-slot:no-options="{ search, searching }">
+                                <template v-if="searching">找不到 <em>{{ search }}</em>。
+                                </template>
+                                <div v-else class="opacity-50">載入中</div>
                             </template>
-                            <div v-else class="opacity-50">請輸入或選擇學校</div>
-                        </template>
-                    </v-select>
+                        </v-select>
                     </td>
                 </tr>
                 <tr>
@@ -100,16 +100,24 @@ export default defineComponent({
         const qd = new QuickData();
         const deptList: any = ref([]);
         // get dept list
-        qf.Url('dept-list').GetAll(deptList);
+        qf.Url('dept-list').Get().then((res: any) => {
+            res.forEach((el: any) => {
+                if (el.univ_id === 'U0009') {
+                    deptList.value.push(el);
+                }
+            });
+        });
         // data
         const data = reactive({
             account: '',
             name: '',
+            org_id: 'U0009',
             dept_id: '',
             phone: '',
             password: '',
             password_confirm: '',
             image: '',
+            verification: 0,
         });
         const errorList = reactive({
             account: {
@@ -147,7 +155,7 @@ export default defineComponent({
         });
 
         function exist() {
-            qf.Url(`auth/student/exist/${data.account}`).Get().then((res: any) => {
+            qf.Url(`auth/user/exist/${data.account}`).Get().then((res: any) => {
                 if (res.message === true) {
                     errorList.account.unique = false;
                 } else {
@@ -172,7 +180,7 @@ export default defineComponent({
             }
             const temp: any = JSON.parse(JSON.stringify(data));
             delete temp.password_confirm;
-            qf.Url('auth/student/register').Post(temp).then((res: any) => {
+            qf.Url('auth/user/register').Post(temp).then((res: any) => {
                 if (res.message === 'done') {
                     qd.Alert('註冊成功');
                     context.emit('refresh');

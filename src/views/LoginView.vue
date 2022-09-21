@@ -17,16 +17,6 @@
             </div>
             <hr class="my-2">
             <div class="mb-2">
-                <div class="text-gray-600">請選擇身份別：</div>
-                <select class="block w-full p-1 border-b-2 border-gray-200 focus:border-black" v-model="identity">
-                    <option value="" disabled selected>請選擇身份別</option>
-                    <option value="idv">個人報名(公開組)</option>
-                    <option value="stu">中山學生(新生盃、田徑新生組)</option>
-                    <option value="sch">大專院校(大專組)</option>
-                    <option value="grp">一般單位(公開組)</option>
-                </select>
-            </div>
-            <div class="mb-2">
                 <div class="mb-q">帳號 Account</div>
                 <input type="text" class="block w-full p-1 border-b-2 border-gray-200 focus:border-black" placeholder="abc@ijk.xyz" v-model="account">
             </div>
@@ -107,25 +97,16 @@ export default defineComponent({
         const router = useRouter();
         qf.Url('reg-system').GetNoH(regSystem);
         function submitAll(): any {
-            if (identity.value === '') {
-                qd.Alert('請選擇身份別');
-            } else if (account.value.length === 0) {
+            if (account.value.length === 0) {
                 qd.Alert('請輸入帳號');
             } else if (password.value.length === 0) {
                 qd.Alert('請輸入密碼');
             } else {
-                let url = '';
-                if (identity.value === 'stu') {
-                    url = 'auth/student/login';
-                } else {
-                    url = 'auth/user/login';
-                }
                 qf.Dataset().AddObj('account', account).AddObj('password', password);
-                qf.Url(url).Post(qf.GetDset()).then((res: any) => {
+                qf.Url('auth/user/login').Post(qf.GetDset()).then((res: any) => {
                     if (res.message === 'done') {
                         router.push('/');
                         // eslint-disable-next-line no-param-reassign
-                        res.data.user.type = identity.value;
                         localStorage.sep5_reg_data = JSON.stringify(res.data.user);
                         localStorage.sep5_reg_token = res.data.token;
                     } else if (res.message === 'wrong_password') {
