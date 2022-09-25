@@ -156,4 +156,18 @@ export class QuickData {
     public ResetConfirm(){
         this.store.commit('setConfirmAnswer', '');
     }
+    public SportPrefix(sportCode: string) {
+        let prefix = '';
+        switch (sportCode) {
+        case 'athl':
+            prefix = 'athletics';
+            break;
+        case 'swim':
+            prefix = 'swimming';
+            break;
+        default:
+            prefix = 'general';
+        }
+        return prefix;
+    }
 }

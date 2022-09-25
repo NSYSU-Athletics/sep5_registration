@@ -4,83 +4,65 @@
             <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">回上頁</div>
         </div>
         <div class="box-section">
-            <div class="title">新增選手</div>
-            <hr>
-            <table class="new-athlete">
-                <tr>
-                    <td>
-                        <label>
-                            <span>身分證字號：</span>
-                            <input type="text">
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <span>姓名：</span>
-                            <input type="text">
-                        </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label>
-                            <span>性別：</span>
-                            <select>
-                                <option value="1">生理男</option>
-                                <option value="2">生理女</option>
-                            </select>
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <span>生日：</span>
-                            <input type="date">
-                        </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label v-if="gameData.nsysu==0">
-                            <span>系所：</span>
-                            <select>
-                            </select>
-                        </label>
-                    </td>
-                    <td>
-                        <label>
-                            <span>手機：</span>
-                            <input type="text">
-                        </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label v-if="gameData.nsysu==0">
-                            <span>學號：</span>
-                            <input type="text">
-                        </label>
-                    </td>
-                    <td class="text-right">
-                        <button class="button">新增</button>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div class="box-section">
             <div class="title">選手列表</div>
             <hr>
+            <table class="athlete-list">
+                <tr>
+                    <th class="w-[20%]">身分證字號</th>
+                    <th class="w-[20%]">學校/團體</th>
+                    <th class="w-[20%]">系所</th>
+                    <th class="w-[15%]">姓名</th>
+                    <th class="w-[10%]">性別</th>
+                    <th class="w-[15%]">
+                        <button class="button" @click="displayModal=1">新增</button>
+                    </th>
+                </tr>
+                <template v-for="(item, index) in athleteList" :key="index">
+                    <tr>
+                        <td>{{item.unified_id}}</td>
+                        <td class="w-[20%] truncate max-w-0">{{item.org_ch}}</td>
+                        <td class="w-[20%] truncate max-w-0">{{item.dept_ch}}</td>
+                        <td class="w-[15%] truncate max-w-0">{{item.name}}</td>
+                        <td>
+                            <span v-if="item.sex==1">男</span>
+                            <span v-if="item.sex==2">女</span>
+                        </td>
+                        <td>
+                            <button class="button" @click="editAthlete(item)">顯示</button>
+                        </td>
+                    </tr>
+                </template>
+            </table>
         </div>
     </div>
+    <SmallModal v-show="displayModal>0" @close_modal="displayModal=0">
+        <template v-slot:title>
+            <div class="text-2xl">
+                <div v-if="displayModal==1">新增選手</div>
+                <div v-if="displayModal==2">選手資訊</div>
+            </div>
+        </template>
+        <template v-slot:content>
+            <hr class="my-2">
+            <AddAthlete v-if="displayModal==1" @close_modal="displayModal=0" @refresh="getAthleteList"></AddAthlete>
+            <EditAthlete v-if="displayModal==2" @close_modal="displayModal=0" @refresh="getAthleteList" :athlete-data="selected"></EditAthlete>
+        </template>
+    </SmallModal>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, reactive, ref } from 'vue';
+import SmallModal from '@/components/SmallModal.vue';
 import { QuickData, QuickFetch } from '@/quick';
 import { useRoute } from 'vue-router';
+import AddAthlete from '@/components/main/module/AddAthlete.vue';
+import EditAthlete from '@/components/main/module/EditAthlete.vue';
 
 export default defineComponent({
     setup() {
         const qf = new QuickFetch();
+        const displayModal = ref(0);
+        const selected = ref({});
         const route = useRoute();
         const gameData: any = ref({});
         const userStorage = JSON.parse(localStorage.sep5_reg_data);
@@ -100,10 +82,29 @@ export default defineComponent({
             }
         }
         getOrgList();
+        // athlete
+        const athleteList: any = ref([]);
+        function getAthleteList() {
+            qf.Url(`athlete/get/org/${userStorage.org_id}`).GetAll(athleteList);
+        }
+        getAthleteList();
         return {
+            displayModal,
             gameData,
             orgList,
+            athleteList,
+            getAthleteList,
+            selected,
+            editAthlete: (input: any) => {
+                selected.value = input;
+                displayModal.value = 2;
+            },
         };
+    },
+    components: {
+        SmallModal,
+        AddAthlete,
+        EditAthlete,
     },
 });
 </script>
@@ -121,19 +122,10 @@ export default defineComponent({
     input, select {
         @apply border-2 rounded-md p-1;
     }
-    .new-athlete {
+    .athlete-list {
         @apply w-full;
-        td {
-            @apply p-1 w-1/2;
-            label {
-                @apply flex items-center;
-                span {
-                    @apply block flex-shrink-0;
-                }
-                input, select {
-                    @apply block flex-grow w-full;
-                }
-            }
+        td, th {
+            @apply p-1 text-left;
         }
     }
 }

@@ -7,7 +7,7 @@
             <hr class="my-2">
             <div class="mb-2">單位列表</div>
             <div>
-                <v-select class="cursor-pointer" :options="orgList" :reduce="org => org.org_id" v-model="data.org_id" label="name_ch_full">
+                <v-select class="cursor-pointer" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="data.org_id" label="name_ch_full">
                     <template v-slot:no-options="{ search, searching }">
                         <template v-if="searching">找不到 <em>{{ search }}</em>嗎？請<span class="text-orange-400" @click="toNextPage(1)">建立單位資料</span>。
                         </template>
@@ -238,6 +238,7 @@ export default defineComponent({
             password_confirm: '',
             image: null,
             verification: 1,
+            permission: 2,
         });
         const errorList = reactive({
             account: {

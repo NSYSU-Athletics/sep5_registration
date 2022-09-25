@@ -1,7 +1,7 @@
 <template>
     <div>
         <template v-for="(item, index) in data" :key="index">
-            <template v-if="(userStorage.type=='stu' && item.nsysu==0) || (userStorage.type!='stu' && item.nsysu==1)">
+            <template v-if="(item.nsysu == 0 && userStorage.org_id == 'U0009') || item.nsysu == 1">
                 <div class="item-box" @click="$router.push(`/register/${item.game_id}`)">
                     <div>[{{item.sport_ch}}]</div>
                     <div>{{item.reg_end.substr(0, 16)}}</div>

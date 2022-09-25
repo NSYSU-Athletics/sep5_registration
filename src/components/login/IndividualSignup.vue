@@ -67,6 +67,7 @@ export default defineComponent({
             password_confirm: '',
             image: null,
             verification: 1,
+            permission: 2,
         });
         const errorList = reactive({
             account: {

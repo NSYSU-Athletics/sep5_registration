@@ -8,8 +8,13 @@
                     <tr>
                         <td>帳號</td>
                         <td>{{userData.account}}</td>
-                        <td>手機</td>
-                        <td>{{userData.phone}}</td>
+                        <td>權限</td>
+                        <td>
+                            <span v-if="userData.permission==0">一般帳號</span>
+                            <span v-if="userData.permission==1">系所代表</span>
+                            <span v-if="userData.permission==2">學校、團體代表</span>
+                            <span v-if="userData.permission==3">聯盟代表</span>
+                        </td>
                     </tr>
                     <tr>
                         <td>姓名</td>
@@ -25,6 +30,21 @@
                         <td>{{userData.dept_ch}}</td>
                     </tr>
                 </table>
+            </div>
+        </div>
+        <div class="box-section">
+            <div class="title">功能選單</div>
+            <hr>
+            <div>
+                <!--<button class="arrow-button bg-orange-400" @click="$router.push(`/organization`)">
+                    <span>單位資料管理</span>
+                </button>-->
+                <button class="arrow-button bg-orange-400" @click="$router.push(`/account`)">
+                    <span>帳號資料管理</span>
+                </button>
+                <button class="arrow-button bg-orange-400" @click="$router.push(`/athlete`)">
+                    <span>選手資料管理</span>
+                </button>
             </div>
         </div>
         <div class="box-section">

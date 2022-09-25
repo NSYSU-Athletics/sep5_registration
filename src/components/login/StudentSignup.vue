@@ -1,9 +1,9 @@
 <template>
     <div class="text-gray-800">
-        <div class="text-2xl font-medium">中山學生註冊</div>
+        <div class="text-2xl font-medium">大專院校學生註冊</div>
         <hr class="my-2">
         <div v-if="page==1">
-            <div class="text-gray-500 text-sm">限中山學生報名新生盃(含田徑新生組)、系際運動會(系際盃)者。各系所請由一位代表註冊及報名，註冊後須待審核通過方可進行報名。</div>
+            <div class="text-gray-500 text-sm">各系所/單位請由一位代表註冊及報名，註冊後須待審核通過方可進行報名。</div>
             <table class="signup-form">
                 <tr>
                     <td class="label">Email：</td>
@@ -20,15 +20,37 @@
                     </td>
                 </tr>
                 <tr>
+                <td class="label">學校單位：</td>
+                <td>
+                    <v-select class="cursor-pointer"  :clearable="false" :options="univList" :reduce="university => university.univ_id" v-model="data.org_id">
+                        <template v-slot:no-options="{ search, searching }">
+                            <template v-if="searching">找不到 <em>{{ search }}</em>。
+                            </template>
+                            <div v-else class="opacity-50">請輸入或選擇學校</div>
+                        </template>
+                    </v-select>
+                </td>
+            </tr>
+                <tr>
                     <td class="label">系所：</td>
                     <td>
-                        <v-select class="cursor-pointer" :options="deptList" :reduce="department => department.dept_id" v-model="data.dept_id" label="dept_ch">
+                        <v-select class="cursor-pointer"  :clearable="false" :options="deptList" :reduce="department => department.dept_id" v-model="data.dept_id" label="dept_ch">
                             <template v-slot:no-options="{ search, searching }">
                                 <template v-if="searching">找不到 <em>{{ search }}</em>。
                                 </template>
-                                <div v-else class="opacity-50">載入中</div>
+                                <div v-else-if="data.org_id.length > 0" class="opacity-50">載入中</div>
+                            <div v-else class="opacity-50">請選擇學校</div>
                             </template>
                         </v-select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">申請身份：</td>
+                    <td>
+                        <select v-model="data.permission">
+                            <option value="1" selected>系所帳號</option>
+                            <option value="2">學校帳號</option>
+                        </select>
                     </td>
                 </tr>
                 <tr>
@@ -98,15 +120,6 @@ export default defineComponent({
     setup(props, context) {
         const qf = new QuickFetch();
         const qd = new QuickData();
-        const deptList: any = ref([]);
-        // get dept list
-        qf.Url('dept-list').Get().then((res: any) => {
-            res.forEach((el: any) => {
-                if (el.univ_id === 'U0009') {
-                    deptList.value.push(el);
-                }
-            });
-        });
         // data
         const data = reactive({
             account: '',
@@ -118,7 +131,32 @@ export default defineComponent({
             password_confirm: '',
             image: '',
             verification: 0,
+            permission: 1,
         });
+        // get univ list
+        const univList: any = ref([]);
+        qf.Url('univ-list').GetAll(univList).then(() => {
+            for (let i = 0; i < univList.value.length; i++) {
+                univList.value[i].label = `${univList.value[i].univ_name_ch_full} (${univList.value[i].univ_name_en})`;
+            }
+        });
+        // get dept list
+        const deptList: any = ref([]);
+        function getDeptList() {
+            deptList.value = [];
+            qf.Url('dept-list').Get().then((res: any) => {
+                let temp: any = {};
+                for (let i = 0; i < res.length; i++) {
+                    if (res[i].univ_id === data.org_id) {
+                        temp = res[i];
+                        temp.label = `[${res[i].college_ch}] ${res[i].dept_ch}`;
+                        deptList.value.push(temp);
+                    }
+                }
+            });
+        }
+        getDeptList();
+        let univTemp = 'U0009';
         const errorList = reactive({
             account: {
                 filled: false,
@@ -126,6 +164,12 @@ export default defineComponent({
                 unique: true,
             },
             name: {
+                filled: false,
+            },
+            org_id: {
+                filled: false,
+            },
+            dept_id: {
                 filled: false,
             },
             phone: {
@@ -146,12 +190,23 @@ export default defineComponent({
             // eslint-disable-next-line
             errorList.account.format = (/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/.test(data.account));
             errorList.name.filled = data.name.length > 0;
+            errorList.org_id.filled = data.org_id.length > 0;
+            errorList.dept_id.filled = data.dept_id.length > 0;
             errorList.phone.filled = data.phone.length > 0;
             errorList.phone.format = (/^09[0-9]{8}$/.test(data.phone));
             errorList.password.filled = data.password.length > 0;
             errorList.password.format = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/.test(data.password);
             errorList.passwordConfirm.same = data.password === data.password_confirm;
             errorList.passwordConfirm.filled = data.password_confirm.length > 0;
+            if (data.org_id === 'O0000') {
+                qd.Alert('單位設定錯誤');
+                data.org_id = '';
+            }
+            if (data.org_id !== univTemp) {
+                getDeptList();
+                data.dept_id = '';
+                univTemp = data.org_id;
+            }
         });
 
         function exist() {
@@ -213,6 +268,7 @@ export default defineComponent({
             page: ref(1),
             imageUrl,
             loadImage,
+            univList,
             deptList,
             data,
             errorList,
@@ -238,5 +294,8 @@ export default defineComponent({
             @apply border-b-2 p-1 w-full;
         }
     }
+}
+.warning {
+    @apply text-sm text-red-600;
 }
 </style>

@@ -33,7 +33,7 @@
             </div>
             <div class="mt-2">
                 <a class="text-orange-400 block mr-3 text-sm" href="">忘記密碼 Forgot Password</a>
-                <div class="text-sm">賽事問題請洽各校隊，系統操作問題請洽<a class="text-orange-400" href="https://www.facebook.com/NSYSUAthletics" target="_blank">中山田徑</a></div>
+                <div class="text-sm">賽事問題請洽各承辦單位，系統操作問題請洽<a class="text-orange-400" href="https://www.facebook.com/NSYSUAthletics" target="_blank">中山田徑</a></div>
             </div>
         </div>
         <div v-else class="p-5 bg-white w-11/12 sm:w-96 mx-auto shadow text-gray-700 rounded">
@@ -60,8 +60,8 @@
                 <select class="block flex-grow border-2 rounded px-1 py-0.5" v-model="identity">
                     <option value="" disabled selected>請選擇身份別</option>
                     <option value="idv">個人報名(公開組)</option>
-                    <option value="stu">中山學生(新生盃、田徑新生組)</option>
-                    <option value="sch">大專院校(大專組)</option>
+                    <!--<option value="stu">中山學生(新生盃、田徑新生組)</option>-->
+                    <option value="stu">大專院校(大專組)</option>
                     <option value="grp">一般單位(公開組)</option>
                 </select>
             </div>
@@ -113,6 +113,8 @@ export default defineComponent({
                         qd.Alert('密碼錯誤');
                     } else if (res.message === 'account_not_exist') {
                         qd.Alert('帳號不存在');
+                    } else if (res.message === 'not_verified') {
+                        qd.Alert('帳號尚未通過審核');
                     }
                     account.value = '';
                     password.value = '';

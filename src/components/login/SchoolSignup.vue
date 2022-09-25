@@ -2,7 +2,7 @@
     <div class="text-gray-800">
         <div class="text-2xl font-medium">大專院校註冊</div>
         <hr class="my-2">
-        <div class="text-gray-500 text-sm">限中山以外之大專院校報名，請由一位代表填寫該校報名之選手資料。</div>
+        <!--<div class="text-gray-500 text-sm">限中山以外之大專院校報名，請由一位代表填寫該校報名之選手資料。</div>-->
         <table class="signup-form">
             <tr>
                 <td class="label">學校單位：</td>
@@ -88,13 +88,14 @@ export default defineComponent({
         const data = reactive({
             account: '',
             name: '',
-            org_id: '',
+            org_id: 'U0009',
             dept_id: '',
             phone: '',
             password: '',
             password_confirm: '',
             image: null,
-            verification: 1,
+            verification: 0,
+            permission: 0,
         });
         const errorList = reactive({
             account: {
@@ -146,7 +147,8 @@ export default defineComponent({
                 }
             });
         }
-        let univTemp = '';
+        getDeptList();
+        let univTemp = 'U0009';
         watch(data, () => {
             errorList.account.filled = data.account.length > 0;
             // eslint-disable-next-line

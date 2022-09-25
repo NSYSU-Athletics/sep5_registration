@@ -13,6 +13,21 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('../components/main/MainPage.vue'),
             },
             {
+                path: '/organization',
+                name: 'organizationPage',
+                component: () => import('../components/main/OrganizationPage.vue'),
+            },
+            {
+                path: '/athlete',
+                name: 'athletePage',
+                component: () => import('../components/main/AthletePage.vue'),
+            },
+            {
+                path: '/account',
+                name: 'accountPage',
+                component: () => import('../components/main/AccountPage.vue'),
+            },
+            {
                 path: '/register',
                 name: 'registerPage',
                 component: () => import('../components/main/RegisterPage.vue'),
@@ -21,11 +36,6 @@ const routes: Array<RouteRecordRaw> = [
                         path: '/register/:game_id',
                         name: 'registerList',
                         component: () => import('../components/main/module/RegisterList.vue'),
-                    },
-                    {
-                        path: '/register/:game_id/athlete',
-                        name: 'registerAthlete',
-                        component: () => import('../components/main/AthletePage.vue'),
                     },
                     {
                         path: '/register/:game_id/individual',

@@ -6,9 +6,6 @@
         <div class="box-section">
             <div class="title">功能選單</div>
             <hr>
-            <button class="arrow-button bg-orange-400" @click="$router.push(`/register/${$route.params.game_id}/athlete`)">
-                <span>選手編輯</span>
-            </button>
             <button class="arrow-button bg-orange-400" @click="$router.push(`/register/${$route.params.game_id}/individual`)">
                 <span>個人項目</span>
             </button>
@@ -41,7 +38,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-
 .box-section {
     @apply p-5 bg-white shadow my-5;
     .title {
@@ -53,5 +49,4 @@ export default defineComponent({
     }
 }
 </style>
-
 <style lang="scss" src="@/assets/scss/arrow-button.scss" scoped></style>
