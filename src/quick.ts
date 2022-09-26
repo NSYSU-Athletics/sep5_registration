@@ -166,7 +166,7 @@ export class QuickData {
             prefix = 'swimming';
             break;
         default:
-            prefix = 'general';
+            prefix = `general/${sportCode}`;
         }
         return prefix;
     }
