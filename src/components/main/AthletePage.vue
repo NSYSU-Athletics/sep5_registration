@@ -4,7 +4,7 @@
             <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">回上頁</div>
         </div>
         <div class="box-section">
-            <div class="title">選手列表</div>
+            <div class="title">本單位選手列表</div>
             <hr>
             <table class="athlete-list">
                 <tr>
@@ -17,7 +17,7 @@
                         <button class="button" @click="displayModal=1">新增</button>
                     </th>
                 </tr>
-                <template v-for="(item, index) in athleteList" :key="index">
+                <template v-for="(item, index) in athleteList.home" :key="index">
                     <tr>
                         <td>{{item.unified_id}}</td>
                         <td class="w-[20%] truncate max-w-0">{{item.org_ch}}</td>
@@ -34,6 +34,37 @@
                 </template>
             </table>
         </div>
+        <div class="box-section">
+            <div class="title">跨單位選手列表</div>
+            <hr>
+            <table class="athlete-list">
+                <tr>
+                    <th class="w-[20%]">身分證字號</th>
+                    <th class="w-[20%]">學校/團體</th>
+                    <th class="w-[20%]">系所</th>
+                    <th class="w-[15%]">姓名</th>
+                    <th class="w-[10%]">性別</th>
+                    <th class="w-[15%]">
+                        <button class="button" @click="displayModal=1">新增</button>
+                    </th>
+                </tr>
+                <template v-for="(item, index) in athleteList.other" :key="index">
+                    <tr>
+                        <td>{{item.unified_id}}</td>
+                        <td class="w-[20%] truncate max-w-0">{{item.org_ch}}</td>
+                        <td class="w-[20%] truncate max-w-0">{{item.dept_ch}}</td>
+                        <td class="w-[15%] truncate max-w-0">{{item.name}}</td>
+                        <td>
+                            <span v-if="item.sex==1">男</span>
+                            <span v-if="item.sex==2">女</span>
+                        </td>
+                        <td>
+                            <button class="button" @click="editAthlete(item, 'lookup')">顯示</button>
+                        </td>
+                    </tr>
+                </template>
+            </table>
+        </div>
     </div>
     <SmallModal v-show="displayModal>0" @close_modal="displayModal=0">
         <template v-slot:title>
@@ -45,13 +76,13 @@
         <template v-slot:content>
             <hr class="my-2">
             <AddAthlete v-if="displayModal==1" @close_modal="displayModal=0" @refresh="getAthleteList"></AddAthlete>
-            <EditAthlete v-if="displayModal==2" @close_modal="displayModal=0" @refresh="getAthleteList" :athlete-data="selected"></EditAthlete>
+            <EditAthlete v-if="displayModal==2" :edit-type="editType" @close_modal="displayModal=0" @refresh="getAthleteList" :athlete-data="selected"></EditAthlete>
         </template>
     </SmallModal>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import SmallModal from '@/components/SmallModal.vue';
 import { QuickData, QuickFetch } from '@/quick';
 import { useRoute } from 'vue-router';
@@ -63,42 +94,36 @@ export default defineComponent({
         const qf = new QuickFetch();
         const displayModal = ref(0);
         const selected = ref({});
-        const route = useRoute();
         const gameData: any = ref({});
-        const userStorage = JSON.parse(localStorage.sep5_reg_data);
-        function getGameData() {
-            qf.Url(`games/${route.params.game_id}`).GetAll(gameData);
-        }
-        getGameData();
-        // department
-        const orgList: any = ref([]);
-        function getOrgList() {
-            if (userStorage.type === 'stu') {
-                qf.Url('dept-list').GetAll(orgList);
-            } else if (userStorage.type === 'sch') {
-                qf.Url('univ-list').GetAll(orgList);
-            } else {
-                qf.Url('organization/list').GetAll(orgList);
-            }
-        }
-        getOrgList();
+        const userData: any = ref({});
+        const editType: any = ref(undefined);
         // athlete
         const athleteList: any = ref([]);
         function getAthleteList() {
-            qf.Url(`athlete/get/org/${userStorage.org_id}`).GetAll(athleteList);
+            if (userData.value.permission === 2) {
+                qf.Url(`athlete/get/org/${userData.value.org_id}/second`).GetAll(athleteList);
+            } else {
+                qf.Url(`athlete/get/org/${userData.value.org_id}/second/${userData.value.dept_id}`).GetAll(athleteList);
+            }
         }
-        getAthleteList();
+        function getUserData() {
+            qf.Url('auth/user/info').GetAll(userData).then(() => {
+                getAthleteList();
+            });
+        }
+        getUserData();
         return {
             displayModal,
             gameData,
-            orgList,
             athleteList,
             getAthleteList,
             selected,
-            editAthlete: (input: any) => {
+            editAthlete: (input: any, type: string|undefined = undefined) => {
                 selected.value = input;
                 displayModal.value = 2;
+                editType.value = type;
             },
+            editType,
         };
     },
     components: {

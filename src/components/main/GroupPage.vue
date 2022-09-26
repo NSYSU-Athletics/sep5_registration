@@ -4,69 +4,231 @@
             <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">回上頁</div>
         </div>
         <div class="box-section">
-            <div class="title">新增報名</div>
+            <div class="title">隊伍報名</div>
             <hr>
-            <table>
+            <table class="athlete-table">
                 <tr>
-                    <td>
-                        <span>姓名：</span>
-                        <select>
-                            <option value="">測試一</option>
-                            <option value="">測試二</option>
-                            <option value="">測試三</option>
+                    <td>隊名</td>
+                    <td colspan="3">
+                        <select v-model="data.team_id">
+                            <template v-for="(item, index) in teamList" :key="index">
+                            <option :value="item.team_id">{{item.team_name}}</option>
+                        </template>
                         </select>
                     </td>
+                </tr>
+                <tr>
+                    <td>報名組別</td>
                     <td>
-                        <span>組別：</span>
-                        <select>
-                            <option value="">新生男子組</option>
-                            <option value="">新生女子組</option>
-                            <option value="">新生混合組</option>
+                        <select v-model="data.game_division_id">
+                            <template v-for="(item, index) in divisionList" :key="index">
+                                <option v-if="groupSex(item.sex) || item.sex==0" :value="item.game_division_id">{{item.ch}}</option>
+                            </template>
                         </select>
                     </td>
+                    <td>報名項目</td>
                     <td>
-                        <span>項目：</span>
-                        <select>
-                            <option value="">4×100公尺接力</option>
-                            <option value="">8×100公尺大隊接力</option>
+                        <select v-model="data.event_id">
+                            <template v-for="(item, index) in paramsList" :key="index">
+                                <option v-if="item.multiple == 1 && item.game_division_id == data.game_division_id" :value="item.event_id">{{item.event_ch}}</option>
+                            </template>
                         </select>
-                    </td>
-                    <td>
-                        <button class="button">新增</button>
                     </td>
                 </tr>
             </table>
+            <div class="text-right">
+                <button class="button" @click="submitAll">新增</button>
+            </div>
         </div>
         <div class="box-section">
-            <div class="title">報名項目</div>
+            <div class="title">報名內容</div>
             <hr>
-            <table>
+            <table class="register-table">
                 <tr>
-                    <td></td>
-                    <td></td>
+                    <th>隊名</th>
+                    <th>組別</th>
+                    <th>項目</th>
+                    <th></th>
                 </tr>
+                <template v-for="(item, index) in registerList" :key="index">
+                    <tr>
+                        <td>{{item.team_name}}</td>
+                        <td>{{item.ch}}</td>
+                        <td>{{item.event_ch}}</td>
+                        <td>
+                            <button class="button button-red" @click="remove(item)">刪除</button>
+                        </td>
+                    </tr>
+                    <!--
+                    <tr>
+                        <td colspan="3">
+                            <div class="flex items-center gap-2">
+                                <div>成員：</div>
+                                <template v-for="(member, index) in item.member_data_list" :key="index">
+                                    <div>{{member.name}}</div>
+                                </template>
+                            </div>
+                        </td>
+                    </tr>-->
+                </template>
             </table>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import {
+    defineComponent, reactive, ref, watch, computed,
+} from 'vue';
 import { QuickData, QuickFetch } from '@/quick';
 import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
 
 export default defineComponent({
     setup() {
         const qf = new QuickFetch();
+        const qd = new QuickData();
         const route = useRoute();
+        const store = useStore();
+        const userData: any = ref({});
+        const data: any = reactive({
+            team_id: '',
+            game_division_id: 0,
+            event_id: '',
+        });
+        // game data
         const gameData: any = ref({});
-        const userStorage = JSON.parse(localStorage.sep5_reg_data);
+        const paramsList: any = ref([]);
+        const divisionList: any = ref([]);
         function getGameData() {
-            qf.Url(`games/${route.params.game_id}`).GetAll(gameData);
+            qf.Url(`games/${route.params.game_id}`).GetAll(gameData).then(() => {
+                const prefix = qd.SportPrefix(gameData.value.type);
+                qf.Url(`${prefix}/event-params/${gameData.value.game_id}`).GetAll(paramsList);
+                qf.Url(`${prefix}/game-division/${gameData.value.game_id}`).GetAll(divisionList);
+            });
         }
         getGameData();
+        // get team list
+        const teamList: any = ref([]);
+        function getTeamList() {
+            let url = '';
+            if (userData.value.permission === 2) {
+                url = `register/grp/team/${gameData.value.type}/${gameData.value.game_id}/${userData.value.org_id}`;
+            } else {
+                url = `register/grp/team/${gameData.value.type}/${gameData.value.game_id}/${userData.value.org_id}/${userData.value.dept_id}`;
+            }
+            qf.Url(url).GetAll(teamList).then(() => {
+                data.team_id = teamList.value[0].team_id;
+            });
+        }
+        // get user data
+        function getUserData() {
+            qf.Url('auth/user/info').GetAll(userData);
+        }
+        getUserData();
+        const registerList: any = ref([]);
+        function getRegisterList() {
+            if (userData.value.permission === 2) {
+                qf.Url(`register/grp/get/org/${gameData.value.type}/${gameData.value.game_id}/${userData.value.org_id}`).GetAll(registerList);
+            } else {
+                qf.Url(`register/grp/get/dept/${gameData.value.type}/${gameData.value.game_id}/${userData.value.dept_id}`).GetAll(registerList);
+            }
+        }
+        watch([gameData, userData], () => {
+            // eslint-disable-next-line no-prototype-builtins
+            if (gameData.value.hasOwnProperty('game_id') && userData.value.hasOwnProperty('org_id')) {
+                getTeamList();
+                getRegisterList();
+            }
+        });
+        const errorList = reactive({
+            team_id: {
+                filled: false,
+            },
+            game_division_id: {
+                filled: false,
+            },
+            event_id: {
+                filled: false,
+            },
+        });
+        watch(data, () => {
+            errorList.team_id.filled = String(data.team_id).length > 0;
+            errorList.game_division_id.filled = data.game_division_id > 0;
+            errorList.event_id.filled = data.event_id.length > 0;
+        });
+        function submitAll() {
+            // eslint-disable-next-line no-restricted-syntax
+            for (const item of Object.entries(errorList)) {
+                // eslint-disable-next-line no-restricted-syntax
+                for (const error of Object.entries(item[1])) {
+                    if (error[1] === false) {
+                        if (error[0] === 'filled') {
+                            qd.Alert('不得送出空報名內容');
+                        } else {
+                            qd.Alert('請確認輸入的內容');
+                        }
+                        return;
+                    }
+                }
+            }
+            qf.Url(`register/grp/exist/${gameData.value.type}/${gameData.value.game_id}/${data.team_id}/${data.game_division_id}/${data.event_id}`).Get().then((status: any) => {
+                if (status.message === true) {
+                    qd.Alert('該隊伍已報名過此組別項目');
+                } else {
+                    qf.Url(`register/grp/add/${gameData.value.type}/${gameData.value.game_id}`).Post(data).then((res: any) => {
+                        if (res.message === 'done') {
+                            qd.Alert('新增成功');
+                            data.game_division_id = 0;
+                            data.event_id = '';
+                            getRegisterList();
+                        }
+                    });
+                }
+            });
+        }
+        let removeTemp: any = {};
+        function remove(input: any) {
+            qd.Confirm('確定要刪除嗎？');
+            removeTemp = input;
+        }
+        const confirmAnswer = computed(() => store.state.confirmAnswer);
+        watch(confirmAnswer, (val: any) => {
+            if (val === 'y') {
+                qf.Url(`register/grp/delete/${gameData.value.type}/${gameData.value.game_id}`).Delete(`${removeTemp.team_id}/${removeTemp.game_division_id}/${removeTemp.event_id}`).then((res: any) => {
+                    if (res.message === 'done') {
+                        qd.Alert('已刪除該報名項目');
+                        getRegisterList();
+                    }
+                });
+            }
+            if (val === 'n') {
+                qd.Alert('取消刪除');
+            }
+            qd.ResetConfirm();
+        });
         return {
-            gameData,
+            data,
+            teamList,
+            divisionList,
+            paramsList,
+            getTeamList,
+            registerList,
+            groupSex: (input: number) => {
+                let flag = true;
+                teamList.value.forEach((team: any) => {
+                    if (team.team_id === data.team_id) {
+                        team.member_data_list.forEach((member: any) => {
+                            if (member.sex !== input) {
+                                flag = false;
+                            }
+                        });
+                    }
+                });
+                return flag;
+            },
+            remove,
+            submitAll,
         };
     },
 });
@@ -85,21 +247,22 @@ export default defineComponent({
     input, select {
         @apply border-2 rounded-md p-1;
     }
-    .new-athlete {
-        @apply w-full;
-        td {
-            @apply p-1 w-1/2;
-            label {
-                @apply flex items-center;
-                span {
-                    @apply block flex-shrink-0;
-                }
-                input, select {
-                    @apply block flex-grow w-full;
-                }
+}
+.athlete-table, .register-table {
+    @apply w-full;
+    td, th {
+        @apply p-1 text-left;
+        input[type=text], input[type=date], select {
+            @apply border-2 rounded p-0.5 w-full;
+        }
+        label {
+            @apply inline-block p-1;
+            span {
+                @apply inline-block ml-2;
             }
         }
     }
 }
 </style>
 <style lang="scss" src="@/assets/scss/button.scss" scoped></style>
+<style lang="scss" src="@/assets/scss/arrow-button.scss" scoped></style>

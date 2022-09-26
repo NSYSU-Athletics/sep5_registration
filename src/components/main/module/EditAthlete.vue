@@ -1,5 +1,6 @@
 <template>
     <div>
+        <div class="text-gray-400">系所管理員僅可編輯本系選手</div>
         <table class="athlete-table">
             <tr>
                 <td class="w-[20%]">身分證字號</td>
@@ -33,9 +34,10 @@
                     </label>
                 </td>
             </tr>
+            <!--1-->
             <template v-if="data.student==1">
                 <tr>
-                    <td>學校*</td>
+                    <td>主要學校*</td>
                     <td>
                         <v-select class="cursor-pointer" :disabled="lockList.org_id || (!isEdit)" :clearable="false" :options="univList" :reduce="university => university.univ_id" v-model="data.org_id" @input="resetSelect">
                             <template v-slot:no-options="{ search, searching }">
@@ -46,7 +48,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>系所</td>
+                    <td>主要系所</td>
                     <td>
                         <div v-if="deptList.length>0">
                             <v-select class="cursor-pointer" :disabled="lockList.dept_id || (!isEdit)" :clearable="false" :options="deptList" :reduce="department => department.dept_id" v-model="data.dept_id" label="label">
@@ -63,9 +65,51 @@
             </template>
             <template v-else>
                 <tr>
-                    <td>團體*</td>
+                    <td>主要團體*</td>
                     <td>
                         <v-select class="cursor-pointer" :disabled="lockList.org_id || (!isEdit)" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="data.org_id" label="name_ch_full">
+                            <template v-slot:no-options="{ search, searching }">
+                                <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
+                                <div v-else class="opacity-50">請輸入或選擇團體</div>
+                            </template>
+                        </v-select>
+                    </td>
+                </tr>
+            </template>
+            <!--2-->
+            <template v-if="data.student==1">
+                <tr>
+                    <td>兼任學校</td>
+                    <td>
+                        <v-select class="cursor-pointer" :disabled="lockList.sec_org_id || (!isEdit)" :clearable="false" :options="univList" :reduce="university => university.univ_id" v-model="data.sec_org_id" @input="resetSelectSec">
+                            <template v-slot:no-options="{ search, searching }">
+                                <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
+                                <div v-else class="opacity-50">請輸入或選擇學校</div>
+                            </template>
+                        </v-select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>兼任系所</td>
+                    <td>
+                        <div v-if="deptList.length>0">
+                            <v-select class="cursor-pointer" :disabled="lockList.sec_dept_id || (!isEdit)" :clearable="false" :options="deptList" :reduce="department => department.dept_id" v-model="data.sec_dept_id" label="label">
+                                <template v-slot:no-options="{ search, searching }">
+                                    <template v-if="searching">找不到 <em>{{ search }}</em>。
+                                    </template>
+                                    <div v-else-if="data.org_id.length > 0" class="opacity-50">載入中</div>
+                                <div v-else class="opacity-50">請選擇學校</div>
+                                </template>
+                            </v-select>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            <template v-else>
+                <tr>
+                    <td>兼任團體</td>
+                    <td>
+                        <v-select class="cursor-pointer" :disabled="lockList.sec_org_id || (!isEdit)" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="data.sec_org_id" label="name_ch_full">
                             <template v-slot:no-options="{ search, searching }">
                                 <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
                                 <div v-else class="opacity-50">請輸入或選擇團體</div>
@@ -102,7 +146,7 @@
                 </td>
             </tr>
         </table>
-        <div class="text-right">
+        <div class="text-right" v-if="editType!='lookup'">
             <button v-if="isEdit" class="button button-red" @click="deleteAll">刪除</button>
             <button v-if="isEdit" class="button" @click="submitAll">儲存</button>
             <button v-else class="button" @click="isEdit = true">編輯</button>
@@ -120,18 +164,21 @@ import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 
 export default defineComponent({
-    props: ['athleteData'],
+    props: ['athleteData', 'editType'],
     setup(props, context) {
         const qf = new QuickFetch();
         const qd = new QuickData();
         const store = useStore();
         const isEdit = ref(false);
+        const displayType = ref(props.editType);
         // data
-        const data = reactive({
+        const data: any = reactive({
             unified_id: props.athleteData.unified_id,
             name: props.athleteData.name,
             org_id: props.athleteData.org_id,
+            sec_org_id: props.athleteData.sec_org_id,
             dept_id: props.athleteData.dept_id,
+            sec_dept_id: props.athleteData.sec_dept_id,
             sex: Number(props.athleteData.sex),
             student: Number(props.athleteData.student),
             student_id: props.athleteData.student_id,
@@ -143,7 +190,9 @@ export default defineComponent({
         });
         const lockList = reactive({
             org_id: false,
+            sec_org_id: false,
             dept_id: false,
+            sec_dept_id: false,
             student: false,
         });
         // get org list
@@ -184,22 +233,22 @@ export default defineComponent({
                     data.student = res.org_id.substr(0, 1) === 'U' ? 1 : 0;
                 } else if (res.permission === 1) {
                     lockList.org_id = true;
+                    lockList.sec_org_id = true;
                     lockList.dept_id = true;
                     lockList.student = true;
                     data.student = res.org_id.substr(0, 1) === 'U' ? 1 : 0;
+                    data.sec_org_id = data.org_id;
                 } else {
                     lockList.org_id = false;
+                    lockList.sec_org_id = false;
                     lockList.dept_id = false;
+                    lockList.sec_dept_id = false;
                     lockList.student = false;
                 }
             });
         }
         getUserData();
         const errorList = reactive({
-            unified_id: {
-                filled: false,
-                unique: true,
-            },
             name: {
                 filled: false,
             },
@@ -210,21 +259,15 @@ export default defineComponent({
                 filled: false,
             },
         });
-        watch(data, () => {
-            errorList.unified_id.filled = data.unified_id.length > 0;
+        function validation() {
             errorList.name.filled = data.name.length > 0;
             errorList.org_id.filled = data.org_id.length > 0;
             errorList.birthday.filled = data.birthday.length > 0;
-        });
-        function exist() {
-            qf.Url(`athlete/exist/${data.unified_id}`).Get().then((res: any) => {
-                if (res.message === true) {
-                    errorList.unified_id.unique = false;
-                } else {
-                    errorList.unified_id.unique = true;
-                }
-            });
         }
+        validation();
+        watch(data, () => {
+            validation();
+        });
         function submitAll() {
             // eslint-disable-next-line no-restricted-syntax
             for (const item of Object.entries(errorList)) {
@@ -239,6 +282,14 @@ export default defineComponent({
                         return;
                     }
                 }
+            }
+            if (data.org_id === data.sec_org_id && data.dept_id === data.sec_dept_id) {
+                qd.Alert('兼任校系不得與主要校系相同');
+                return;
+            }
+            if (data.org_id === data.sec_org_id && data.sec_dept_id.length === 0) {
+                qd.Alert('兼任學校/團體不得與主要學校/團體相同');
+                return;
             }
             const temp: any = JSON.parse(JSON.stringify(data));
             qf.Url('athlete/edit').Patch(props.athleteData.athlete_id, temp).then((res: any) => {
@@ -283,9 +334,11 @@ export default defineComponent({
             lockList,
             submitAll,
             deleteAll,
-            exist,
             resetSelect: () => {
                 data.dept_id = '';
+            },
+            resetSelectSec: () => {
+                data.sec_dept_id = '';
             },
             changeOrg: (input: number) => {
                 if (input === 1 && data.org_id.substring(0, 1) !== 'U') {
@@ -296,6 +349,7 @@ export default defineComponent({
                 }
             },
             isEdit,
+            displayType,
         };
     },
     components: {
@@ -319,6 +373,9 @@ export default defineComponent({
             }
         }
     }
+}
+.warning {
+    @apply text-sm text-red-600;
 }
 </style>
 <style lang="scss" src="@/assets/scss/button.scss" scoped></style>

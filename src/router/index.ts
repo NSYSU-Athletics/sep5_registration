@@ -43,6 +43,11 @@ const routes: Array<RouteRecordRaw> = [
                         component: () => import('../components/main/IndividualPage.vue'),
                     },
                     {
+                        path: '/register/:game_id/team',
+                        name: 'registerTeam',
+                        component: () => import('../components/main/TeamPage.vue'),
+                    },
+                    {
                         path: '/register/:game_id/group',
                         name: 'registerGroup',
                         component: () => import('../components/main/GroupPage.vue'),

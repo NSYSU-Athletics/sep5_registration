@@ -29,7 +29,6 @@ export default defineComponent({
         const confirmMessage = computed(() => store.state.confirmBox);
         const confirmAnswer = ref('');
         watch(message, (val) => {
-            console.log(val);
             if (val.length > 0) {
                 setTimeout(() => {
                     store.commit('setMessageBox', '');

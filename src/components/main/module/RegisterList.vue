@@ -9,7 +9,7 @@
             <button class="arrow-button bg-orange-400" @click="$router.push(`/register/${$route.params.game_id}/individual`)">
                 <span>個人項目</span>
             </button>
-            <button class="arrow-button bg-orange-400" @click="$router.push(`/register/${$route.params.game_id}/group`)">
+            <button class="arrow-button bg-orange-400" @click="$router.push(`/register/${$route.params.game_id}/team`)">
                 <span>團體項目</span>
             </button>
         </div>

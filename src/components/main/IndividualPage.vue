@@ -70,7 +70,7 @@
                     <td>
                         <select v-model="data.game_division_id">
                             <template v-for="(item, index) in divisionList" :key="index">
-                                <option v-if="sex==item.sex" :value="item.game_division_id">{{item.ch}}</option>
+                                <option v-if="sex==item.sex || item.sex==0" :value="item.game_division_id">{{item.ch}}</option>
                             </template>
                         </select>
                     </td>
@@ -84,7 +84,9 @@
                     </td>
                 </tr>
             </table>
-            <button class="button" @click="submitAll">新增</button>
+            <div class="text-right">
+                <button class="button" @click="submitAll">新增</button>
+            </div>
         </div>
         <div class="box-section">
             <div class="title">報名項目</div>
@@ -209,7 +211,17 @@ export default defineComponent({
         // athlete
         const athleteList: any = ref([]);
         function getAthleteList() {
-            qf.Url(`athlete/get/org/${userData.value.org_id}`).GetAll(athleteList);
+            let url = '';
+            if (userData.value.permission === 2) {
+                url = `athlete/get/org/${userData.value.org_id}/second`;
+            } else {
+                url = `athlete/get/org/${userData.value.org_id}/second/${userData.value.dept_id}`;
+            }
+            qf.Url(url).Get().then((res: any) => {
+                const temp = res.home;
+                temp.concat(res.other);
+                athleteList.value = temp.concat(JSON.parse(JSON.stringify(res.other)));
+            });
         }
         const registerList: any = ref([]);
         function getRegisterList() {
@@ -234,14 +246,42 @@ export default defineComponent({
                 }
             }
         });
+        const errorList = reactive({
+            athlete_id: {
+                filled: false,
+            },
+            game_division_id: {
+                filled: false,
+            },
+            event_id: {
+                filled: false,
+            },
+        });
         watch(data, () => {
             athleteList.value.forEach((item: any) => {
                 if (item.athlete_id === data.athlete_id) {
                     sex.value = item.sex;
                 }
             });
+            errorList.athlete_id.filled = String(data.athlete_id).length > 0;
+            errorList.game_division_id.filled = data.game_division_id > 0;
+            errorList.event_id.filled = data.event_id.length > 0;
         });
         function submitAll() {
+            // eslint-disable-next-line no-restricted-syntax
+            for (const item of Object.entries(errorList)) {
+                // eslint-disable-next-line no-restricted-syntax
+                for (const error of Object.entries(item[1])) {
+                    if (error[1] === false) {
+                        if (error[0] === 'filled') {
+                            qd.Alert('不得送出空報名內容');
+                        } else {
+                            qd.Alert('請確認輸入的內容');
+                        }
+                        return;
+                    }
+                }
+            }
             qf.Url(`register/ind/exist/${gameData.value.type}/${gameData.value.game_id}/${data.athlete_id}/${data.game_division_id}/${data.event_id}`).Get().then((status: any) => {
                 if (status.message === true) {
                     qd.Alert('該選手已報名過此組別項目');
@@ -298,6 +338,7 @@ export default defineComponent({
             submitAll,
             registerList,
             remove,
+            errorList,
         };
     },
     components: {
