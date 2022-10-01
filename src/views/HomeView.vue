@@ -7,7 +7,8 @@
                 <div class="text-xs">Sports Events Registration System</div>
             </div>
             <div class="flex-grow"></div>
-            <!--<div class="nav-button">帳號</div>-->
+            <div class="nav-button" v-if="language=='en'" @click="language='ch'">中文</div>
+            <div class="nav-button" v-if="language=='ch'" @click="language='en'">EN</div>
             <div class="nav-button" @click="logout">登出</div>
         </div>
         <div class="flex-grow bg-gray-100">
@@ -17,12 +18,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { QuickData, QuickFetch } from '@/quick';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 export default defineComponent({
     setup() {
+        // vuex
+        const store = useStore();
         const qf = new QuickFetch();
         const qd = new QuickData();
         const router = useRouter();
@@ -37,8 +41,16 @@ export default defineComponent({
                 }
             });
         }
+        const language = ref(store.state.language);
+        if (navigator.language.includes('en')) {
+            store.commit('setLanguage', 'en');
+        }
+        watch(language, () => {
+            store.commit('setLanguage', language.value);
+        });
         return {
             logout,
+            language,
         };
     },
 });

@@ -1,123 +1,124 @@
 <template>
     <div class="text-gray-800">
-        <div class="text-2xl font-medium">一般單位註冊</div>
+        <div class="text-2xl font-medium">一般單位註冊<br>Organization Signup</div>
         <hr class="my-2">
         <div v-show="nowPage==0">
-            <div class="text-gray-500 text-sm">僅限報名公開組填寫，請輸入或選擇單位，若無您的單位名稱，請<span class="text-orange-400 cursor-pointer" @click="toNextPage(1)">建立單位資料</span>。</div>
+            <div class="text-gray-500 text-sm">請輸入或選擇單位，若無您的單位名稱，請<span class="text-orange-400 cursor-pointer" @click="toNextPage(1)">建立單位資料</span>。<br>If there is no your organization, Please <span class="text-orange-400 cursor-pointer" @click="toNextPage(1)">create it</span>.</div>
             <hr class="my-2">
-            <div class="mb-2">單位列表</div>
+            <div class="mb-2">單位列表 Organization List</div>
             <div>
                 <v-select class="cursor-pointer" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="data.org_id" label="name_ch_full">
                     <template v-slot:no-options="{ search, searching }">
-                        <template v-if="searching">找不到 <em>{{ search }}</em>嗎？請<span class="text-orange-400" @click="toNextPage(1)">建立單位資料</span>。
+                        <template v-if="searching">找不到 <em>{{ search }}</em> 嗎？請<span class="text-orange-400" @click="toNextPage(1)">建立單位資料</span> <em>{{ search }}</em> not found. Please <span class="text-orange-400" @click="toNextPage(1)">create it</span>.
                         </template>
-                        <div v-else class="opacity-50">請輸入或選擇單位</div>
+                        <div v-else class="opacity-50">請輸入或選擇單位 Please select your organization.</div>
                     </template>
                 </v-select>
             </div>
             <div class="mt-2" v-if="data.org_id!=='' && data.org_id !==null">
-                <button class="full-button bg-orange-400 text-white" @click="toNextPage(2)">下一步</button>
+                <button class="full-button bg-orange-400 text-white" @click="toNextPage(2)">下一步 Next</button>
             </div>
         </div>
         <div v-show="nowPage==1">
             <div @click="nowPage = 0" class="text-lg text-gray-500 flex items-center my-2 cursor-pointer">
                 <div class="material-icons">arrow_back_ios</div>
-                <div>回上一步</div>
+                <div>回上一步 Back</div>
             </div>
-            <div>建立單位資料</div>
+            <div>建立單位資料 Create new organization</div>
             <table class="signup-form">
                 <tr>
-                    <td class="label">中文名稱：</td>
+                    <td class="label">中文名稱 Name (CH)</td>
                     <td>
                         <input type="text" v-model="orgData.name_ch_full" @blur="orgExist">
-                        <div v-if="orgData.name_ch_full.length>0 && !orgError.name_ch_full.unique" class="warning">Email已存在</div>
+                        <div v-if="orgData.name_ch_full.length>0 && !orgError.name_ch_full.unique" class="warning">單位已存在 Organization has already been added.</div>
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">中文簡稱：</td>
+                    <td class="label">中文簡稱 Abbr. (CH)</td>
                     <td>
                         <input type="text" v-model="orgData.name_ch">
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">英文名稱：</td>
+                    <td class="label">英文名稱 Name (EN)</td>
                     <td>
                         <input type="text" v-model="orgData.name_en_full">
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">英文簡稱：</td>
+                    <td class="label">英文簡稱 Abbr. (EN)</td>
                     <td>
                         <input type="text" v-model="orgData.name_en">
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">聯絡電話：</td>
+                    <td class="label">聯絡電話 Phone (TW)</td>
                     <td>
                         <input type="text" v-model="orgData.phone">
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">所屬縣市：</td>
+                    <td class="label">所屬縣市 City</td>
                     <td>
                         <select v-model="orgData.city">
                             <template v-for="(item, index) in cityList" :key="index">
-                                <option :value="item.city_id">{{item.city_ch}}</option>
+                                <option :value="item.city_id">{{item.city_ch}} {{item.city_en}}</option>
                             </template>
                         </select>
                     </td>
                 </tr>
             </table>
+            <div class="my-2">If your organization does not have a Chinese name, Please just fill in English name in BOTH Name (CH) and Name (EN) blank.</div>
             <div>
-                <button class="full-button bg-orange-400 text-white" @click="submitOrg">建立</button>
+                <button class="full-button bg-orange-400 text-white" @click="submitOrg">建立 Create</button>
             </div>
         </div>
         <div v-show="nowPage==2">
         <div @click="nowPage = prevPage" class="text-lg text-gray-500 flex items-center my-2 cursor-pointer">
                 <div class="material-icons">arrow_back_ios</div>
-                <div>回上一步</div>
+                <div>回上一步 Back</div>
             </div>
+            <div>單位帳號註冊 Organization Account Signup</div>
             <table class="signup-form">
-                <div>單位帳號註冊</div>
                 <tr>
-                    <td class="label">Email：</td>
+                    <td class="label">Email</td>
                     <td>
                         <input type="email" v-model="data.account" @blur="exist">
-                        <div v-if="data.account.length>0 && !errorList.account.format" class="warning">Email格式錯誤</div>
-                        <div v-if="data.account.length>0 && !errorList.account.unique" class="warning">Email已存在</div>
+                        <div v-if="data.account.length>0 && !errorList.account.format" class="warning">Email格式錯誤 Wrong format.</div>
+                        <div v-if="data.account.length>0 && !errorList.account.unique" class="warning">Email已存在 Email has been taken.</div>
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">真實姓名：</td>
+                    <td class="label">真實姓名 Name</td>
                     <td>
                         <input type="text" v-model="data.name">
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">手機號碼：</td>
+                    <td class="label">手機號碼 Phone(TW)</td>
                     <td>
                         <input type="text" v-model="data.phone">
                         <div v-if="data.phone.length>0 && !errorList.phone.format" class="warning">手機格式錯誤</div>
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">密碼：</td>
+                    <td class="label">密碼 Password</td>
                     <td>
                         <input type="password" v-model="data.password">
-                        <div v-if="data.password.length>0 && !errorList.password.format" class="warning">密碼需格有大小寫字母與數字，並至少8個字元</div>
+                        <div v-if="data.password.length>0 && !errorList.password.format" class="warning">密碼需格有大小寫字母與數字，並至少8個字元<br>Password must be at least 1 Uppercase character and 1 Lowercase character, with a minimum length of 8 characters.</div>
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">確認密碼：</td>
+                    <td class="label">確認密碼 Confirm Password</td>
                     <td>
                         <input type="password" v-model="data.password_confirm">
-                        <div v-if="data.password_confirm.length>0 && !errorList.passwordConfirm.same" class="warning">兩次輸入密碼不相同</div>
+                        <div v-if="data.password_confirm.length>0 && !errorList.passwordConfirm.same" class="warning">兩次輸入密碼不相同 Password not match.</div>
                     </td>
                 </tr>
             </table>
-            <div class="my-3 text-gray-500 text-sm">當您按下註冊，即代表您同意我們的<a href="" class="text-orange-400">使用政策與隱私權條款</a></div>
+            <!--<div class="my-3 text-gray-500 text-sm">當您按下註冊，即代表您同意我們的<a href="" class="text-orange-400">使用政策與隱私權條款</a></div>-->
             <div>
-                <button class="full-button bg-orange-400 text-white" @click="submitAll">註冊</button>
+                <button class="full-button bg-orange-400 text-white" @click="submitAll">註冊 Signup</button>
             </div>
         </div>
     </div>
@@ -291,9 +292,9 @@ export default defineComponent({
                 for (const error of Object.entries(item[1])) {
                     if (error[1] === false) {
                         if (error[0] === 'filled') {
-                            qd.Alert('請確認所有欄位皆已填寫');
+                            qd.Alert('請確認所有欄位皆已填寫 Please fill in all required fields.');
                         } else {
-                            qd.Alert('請確認輸入的內容');
+                            qd.Alert('請確認輸入的內容 Please check your input data.');
                         }
                         return;
                     }
@@ -303,7 +304,7 @@ export default defineComponent({
             delete temp.password_confirm;
             qf.Url('auth/user/register').Post(temp).then((res: any) => {
                 if (res.message === 'done') {
-                    qd.Alert('註冊成功');
+                    qd.Alert('註冊成功 Done');
                     context.emit('refresh');
                     context.emit('close_modal');
                     data.account = '';

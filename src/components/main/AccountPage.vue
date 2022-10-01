@@ -1,51 +1,93 @@
 <template>
     <div class="mx-auto w-full p-5 sm:w-11/12 md:w-4/5 lg:w-2/3 xl:w-1/2 py-5">
         <div class="box-section">
-            <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">回上頁</div>
+            <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">
+                <template v-if="language=='ch'">回上頁</template>
+                <template v-if="language=='en'">Back</template>
+            </div>
         </div>
         <div class="box-section">
-            <div class="title">帳號資料管理</div>
+            <div class="title">
+                <template v-if="language=='ch'">帳號資料管理</template>
+                <template v-if="language=='en'">Account Info</template>
+            </div>
             <hr>
             <table>
                 <tr>
-                    <td>帳號</td>
+                    <td>
+                        <template v-if="language=='ch'">帳號</template>
+                        <template v-if="language=='en'">Account</template>
+                    </td>
                     <td>{{userData.account}}</td>
                 </tr>
                 <tr>
-                    <td>姓名</td>
+                    <td>
+                        <template v-if="language=='ch'">姓名</template>
+                        <template v-if="language=='en'">Name</template>
+                    </td>
                     <td v-if="isEdit">
                         <input type="text" v-model="data.name">
                     </td>
                     <td v-else>{{userData.name}}</td>
                 </tr>
                 <tr>
-                    <td>手機號碼</td>
+                    <td>
+                        <template v-if="language=='ch'">手機號碼</template>
+                        <template v-if="language=='en'">Phone (TW)</template>
+                    </td>
                     <td v-if="isEdit">
                         <input type="text" v-model="data.phone">
                     </td>
                     <td v-else>{{userData.phone}}</td>
                 </tr>
                 <tr>
-                    <td>單位全名</td>
-                    <td>{{userData.name_ch_full}}</td>
-                </tr>
-                <tr>
-                    <td>單位簡稱</td>
-                    <td>{{userData.name_ch}}</td>
-                </tr>
-                <tr>
-                    <td>權限</td>
                     <td>
-                        <span v-if="userData.permission==0">一般帳號</span>
-                        <span v-if="userData.permission==1">系所代表</span>
-                        <span v-if="userData.permission==2">學校、團體代表</span>
-                        <span v-if="userData.permission==3">聯盟代表</span>
+                        <template v-if="language=='ch'">單位全名</template>
+                        <template v-if="language=='en'">Organization<br>Full Name</template>
+                    </td>
+                    <td>{{userData[`name_${language}_full`]}}</td>
+                </tr>
+                <tr>
+                    <td>
+                        <template v-if="language=='ch'">單位簡稱</template>
+                        <template v-if="language=='en'">Organization<br>Abbriviation</template>
+                    </td>
+                    <td>{{userData[`name_${language}`]}}</td>
+                </tr>
+                <tr>
+                    <td>
+                        <template v-if="language=='ch'">權限</template>
+                        <template v-if="language=='en'">Permission</template>
+                    </td>
+                    <td>
+                        <span v-if="userData.permission==0">
+                            <template v-if="language=='ch'">一般帳號</template>
+                            <template v-if="language=='en'">General</template>
+                        </span>
+                        <span v-if="userData.permission==1">
+                            <template v-if="language=='ch'">系所代表</template>
+                            <template v-if="language=='en'">Departmental</template>
+                        </span>
+                        <span v-if="userData.permission==2">
+                            <template v-if="language=='ch'">單位代表</template>
+                            <template v-if="language=='en'">Organizational</template>
+                        </span>
+                        <span v-if="userData.permission==3">
+                            <template v-if="language=='ch'">聯盟代表</template>
+                            <template v-if="language=='en'">Interorganizational</template>
+                        </span>
                     </td>
                 </tr>
             </table>
             <div class="text-right">
-                <button v-if="!isEdit" class="button" @click="isEdit=true">編輯</button>
-                <button v-if="isEdit" class="button" @click="submitAll">儲存</button>
+                <button v-if="!isEdit" class="button" @click="isEdit=true">
+                    <template v-if="language=='ch'">編輯</template>
+                    <template v-if="language=='en'">Edit</template>
+                </button>
+                <button v-if="isEdit" class="button" @click="submitAll">
+                    <template v-if="language=='ch'">儲存</template>
+                    <template v-if="language=='en'">Save</template>
+                </button>
             </div>
         </div>
     </div>
@@ -53,9 +95,10 @@
 
 <script lang="ts">
 import {
-    defineComponent, ref, reactive, watch,
+    defineComponent, ref, reactive, watch, computed,
 } from 'vue';
 import { QuickData, QuickFetch } from '@/quick';
+import { useStore } from 'vuex';
 
 export default defineComponent({
     setup() {
@@ -121,6 +164,7 @@ export default defineComponent({
             data,
             isEdit,
             submitAll,
+            language: computed(() => useStore().state.language),
         };
     },
 });

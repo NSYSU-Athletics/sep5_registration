@@ -144,7 +144,7 @@ export class QuickData {
     private store = useStore();
 
     public changeLang(langCode: string) {
-        this.store.commit('changeLanguage', langCode);
+        this.store.commit('setLanguage', langCode);
     }
 
     public Alert(message: string|number) {

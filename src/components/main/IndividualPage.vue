@@ -1,101 +1,152 @@
 <template>
     <div class="mx-auto w-full p-5 sm:w-11/12 md:w-4/5 lg:w-2/3">
         <div class="box-section">
-            <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">回上頁</div>
+            <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">
+                <template v-if="language=='ch'">回上頁</template>
+                <template v-if="language=='en'">Back</template>
+            </div>
         </div>
         <div class="box-section">
-            <div class="title">新增報名</div>
+            <div class="title">
+                <template v-if="language=='ch'">新增報名</template>
+                <template v-if="language=='en'">Individual Events</template>
+            </div>
             <hr>
             <table class="athlete-table">
-                <tr>
-                    <td>是否為大專<br>院校學生</td>
+                <tr v-if="userData.org_id!='O0000'">
+                    <td>
+                        <template v-if="language=='ch'">是否為大專<br>院校學生</template>
+                        <template v-if="language=='en'">University<br>Student</template>
+                    </td>
                     <td colspan="3">
                         <label>
                             <input type="radio" value="1" :disabled="lockList.student" v-model="student">
-                            <span>是</span>
+                            <span>
+                                <template v-if="language=='ch'">是</template>
+                                <template v-if="language=='en'">Yes</template>
+                            </span>
                         </label>
                         <label>
                             <input type="radio" value="0" :disabled="lockList.student" v-model="student">
-                            <span>否</span>
+                            <span>
+                                <template v-if="language=='ch'">否</template>
+                                <template v-if="language=='en'">No</template>
+                            </span>
                         </label>
                     </td>
                 </tr>
-                <tr>
-                    <td>所屬單位</td>
+                <tr v-if="userData.org_id!='O0000'">
+                    <td>
+                        <template v-if="language=='ch'">所屬單位</template>
+                        <template v-if="language=='en'">Organization</template>
+                    </td>
                     <td colspan="3">
                         <div v-if="student==1">
-                            <div>學校</div>
+                            <div>
+                                <template v-if="language=='ch'">學校</template>
+                                <template v-if="language=='en'">University</template>
+                            </div>
                             <v-select class="cursor-pointer" :disabled="lockList.org_id" :clearable="false" :options="univList" :reduce="university => university.univ_id" v-model="orgId" @input="resetSelect">
                                 <template v-slot:no-options="{ search, searching }">
-                                    <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
-                                    <div v-else class="opacity-50">請輸入或選擇學校</div>
+                                    <template v-if="searching">找不到 <em>{{ search }}</em> Not found</template>
+                                    <div v-else class="opacity-50">請輸入或選擇學校 Please select your university.</div>
                                 </template>
                             </v-select>
-                            <div>系所</div>
+                            <div>
+                                <template v-if="language=='ch'">系所</template>
+                                <template v-if="language=='en'">Depratment</template>
+                            </div>
                             <div v-if="deptList.length>0">
                                 <v-select class="cursor-pointer" :disabled="lockList.dept_id" :clearable="false" :options="deptList" :reduce="department => department.dept_id" v-model="deptId" label="label">
                                     <template v-slot:no-options="{ search, searching }">
-                                        <template v-if="searching">找不到 <em>{{ search }}</em>。
+                                        <template v-if="searching">找不到 <em>{{ search }}</em> Not found
                                         </template>
-                                        <div v-else-if="orgId.length > 0" class="opacity-50">載入中</div>
-                                    <div v-else class="opacity-50">請選擇學校</div>
+                                        <div v-else-if="orgId.length > 0" class="opacity-50">載入中 Loading</div>
+                                    <div v-else class="opacity-50">請選擇學校 Please select your university.</div>
                                     </template>
                                 </v-select>
                             </div>
                         </div>
                         <div v-if="student==0">
-                            <div>團體</div>
+                            <div>
+                                <template v-if="language=='ch'">團體</template>
+                                <template v-if="language=='en'">Organization Name</template>
+                            </div>
                             <v-select class="cursor-pointer" :disabled="lockList.org_id" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="orgId" label="name_ch_full">
                                 <template v-slot:no-options="{ search, searching }">
-                                    <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
-                                    <div v-else class="opacity-50">請輸入或選擇團體</div>
+                                    <template v-if="searching">找不到 <em>{{ search }}</em> Not found</template>
+                                    <div v-else class="opacity-50">請輸入或選擇團體 Please select your organization.</div>
                                 </template>
                             </v-select>
                         </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>選手</td>
+                    <td>
+                        <template v-if="language=='ch'">選手</template>
+                        <template v-if="language=='en'">Athlete</template>
+                    </td>
                     <td colspan="3">
                         <v-select class="cursor-pointer" :clearable="false" :options="athleteList" :reduce="athlete => athlete.athlete_id" v-model="data.athlete_id" label="name">
                             <template v-slot:no-options="{ search, searching }">
-                                <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
-                                <div v-else class="opacity-50">請輸入或選擇選手</div>
+                                <template v-if="searching">找不到 <em>{{ search }}</em> Not found</template>
+                                <div v-else class="opacity-50">請輸入或選擇選手 Please select an athlete.</div>
                             </template>
                         </v-select>
                     </td>
                 </tr>
                 <tr>
-                    <td>報名組別</td>
+                    <td>
+                        <template v-if="language=='ch'">報名組別</template>
+                        <template v-if="language=='en'">Division</template>
+                    </td>
                     <td>
                         <select v-model="data.game_division_id">
                             <template v-for="(item, index) in divisionList" :key="index">
-                                <option v-if="sex==item.sex || item.sex==0" :value="item.game_division_id">{{item.ch}}</option>
+                                <option v-if="sex==item.sex || item.sex==0" :value="item.game_division_id">{{item[language]}}</option>
                             </template>
                         </select>
                     </td>
-                    <td>報名項目</td>
+                    <td>
+                        <template v-if="language=='ch'">報名項目</template>
+                        <template v-if="language=='en'">Event</template>
+                    </td>
                     <td>
                         <select v-model="data.event_id">
                             <template v-for="(item, index) in paramsList" :key="index">
-                                <option v-if="item.multiple == 0 && item.game_division_id == data.game_division_id" :value="item.event_id">{{item.event_ch}}</option>
+                                <option v-if="item.multiple == 0 && item.game_division_id == data.game_division_id" :value="item.event_id">{{item[`event_${language}`]}}</option>
                             </template>
                         </select>
                     </td>
                 </tr>
             </table>
             <div class="text-right">
-                <button class="button" @click="submitAll">新增</button>
+                <button class="button" @click="submitAll">
+                    <template v-if="language=='ch'">新增</template>
+                    <template v-if="language=='en'">Add</template>
+                </button>
             </div>
         </div>
         <div class="box-section">
-            <div class="title">報名項目</div>
+            <div class="title">
+                <template v-if="language=='ch'">報名項目</template>
+                <template v-if="language=='en'">Registered</template>
+            </div>
             <hr>
             <table class="register-table">
                 <tr>
-                    <th>姓名</th>
-                    <th>組別</th>
-                    <th>項目</th>
+                    <th>
+                        <template v-if="language=='ch'">姓名</template>
+                        <template v-if="language=='en'">Name</template>
+                    </th>
+                    <th>
+                        <template v-if="language=='ch'">組別</template>
+                        <template v-if="language=='en'">Division</template>
+                    </th>
+                    <th>
+                        <template v-if="language=='ch'">項目</template>
+                        <template v-if="language=='en'">Event</template>
+                    </th>
                     <th></th>
                 </tr>
                 <template v-for="(item, index) in registerList" :key="index">
@@ -104,7 +155,10 @@
                         <td>{{item.ch}}</td>
                         <td>{{item.event_ch}}</td>
                         <td>
-                            <button class="button button-red" @click="remove(item)">刪除</button>
+                            <button class="button button-red" @click="remove(item)">
+                                <template v-if="language=='ch'">刪除</template>
+                                <template v-if="language=='en'">Delete</template>
+                            </button>
                         </td>
                     </tr>
                 </template>
@@ -274,9 +328,9 @@ export default defineComponent({
                 for (const error of Object.entries(item[1])) {
                     if (error[1] === false) {
                         if (error[0] === 'filled') {
-                            qd.Alert('不得送出空報名內容');
+                            qd.Alert('請確認所有欄位皆已填寫 Please fill in all required fields.');
                         } else {
-                            qd.Alert('請確認輸入的內容');
+                            qd.Alert('請確認輸入的內容 Please check your input data.');
                         }
                         return;
                     }
@@ -284,11 +338,11 @@ export default defineComponent({
             }
             qf.Url(`register/ind/exist/${gameData.value.type}/${gameData.value.game_id}/${data.athlete_id}/${data.game_division_id}/${data.event_id}`).Get().then((status: any) => {
                 if (status.message === true) {
-                    qd.Alert('該選手已報名過此組別項目');
+                    qd.Alert('該選手已報名過此組別項目 Athlete has already been registered for this division and event.');
                 } else {
                     qf.Url(`register/ind/add/${gameData.value.type}/${gameData.value.game_id}`).Post(data).then((res: any) => {
                         if (res.message === 'done') {
-                            qd.Alert('新增成功');
+                            qd.Alert('新增成功 Done');
                             data.athlete_id = '';
                             data.game_division_id = 0;
                             data.event_id = '';
@@ -339,6 +393,8 @@ export default defineComponent({
             registerList,
             remove,
             errorList,
+            userData,
+            language: computed(() => useStore().state.language),
         };
     },
     components: {

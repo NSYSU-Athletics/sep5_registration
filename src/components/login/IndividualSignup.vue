@@ -1,48 +1,48 @@
 <template>
     <div class="text-gray-800">
-        <div class="text-2xl font-medium">個人報名註冊</div>
+        <div class="text-2xl font-medium">個人報名註冊<br>Individual Signup</div>
         <hr class="my-2">
-        <div class="text-gray-500 text-sm">僅限報名公開組填寫</div>
+        <div class="text-gray-500 text-sm">大專院校學生請勿填寫</div>
         <table class="signup-form">
             <tr>
-                <td class="label">Email：</td>
+                <td class="label">Email</td>
                 <td>
                     <input type="email" v-model="data.account" @blur="exist">
-                    <div v-if="data.account.length>0 && !errorList.account.format" class="warning">Email格式錯誤</div>
-                    <div v-if="data.account.length>0 && !errorList.account.unique" class="warning">Email已存在</div>
+                    <div v-if="data.account.length>0 && !errorList.account.format" class="warning">Email格式錯誤 Wrong format.</div>
+                    <div v-if="data.account.length>0 && !errorList.account.unique" class="warning">Email已存在 Email has been taken.</div>
                 </td>
             </tr>
             <tr>
-                <td class="label">真實姓名：</td>
+                <td class="label">真實姓名 Name</td>
                 <td>
                     <input type="text" v-model="data.name">
                 </td>
             </tr>
             <tr>
-                <td class="label">手機號碼：</td>
+                <td class="label">手機號碼 Phone (TW)</td>
                 <td>
                     <input type="text" v-model="data.phone">
                     <div v-if="data.phone.length>0 && !errorList.phone.format" class="warning">手機格式錯誤</div>
                 </td>
             </tr>
             <tr>
-                <td class="label">密碼：</td>
+                <td class="label">密碼 Password</td>
                 <td>
                     <input type="password" v-model="data.password">
-                    <div v-if="data.password.length>0 && !errorList.password.format" class="warning">密碼需格有大小寫字母與數字，並至少8個字元</div>
+                    <div v-if="data.password.length>0 && !errorList.password.format" class="warning">密碼需格有大小寫字母與數字，並至少8個字元。<br>Password must be at least 1 Uppercase character and 1 Lowercase character, with a minimum length of 8 characters.</div>
                 </td>
             </tr>
             <tr>
-                <td class="label">確認密碼：</td>
+                <td class="label">確認密碼 Confirm Password</td>
                 <td>
                     <input type="password" v-model="data.password_confirm">
-                    <div v-if="data.password_confirm.length>0 && !errorList.passwordConfirm.same" class="warning">兩次輸入密碼不相同</div>
+                    <div v-if="data.password_confirm.length>0 && !errorList.passwordConfirm.same" class="warning">兩次輸入密碼不相同 Password not match.</div>
                 </td>
             </tr>
         </table>
-        <div class="my-3 text-gray-500 text-sm">當您按下註冊，即代表您同意我們的<a href="" class="text-orange-400">使用政策與隱私權條款</a></div>
+        <!--<div class="my-3 text-gray-500 text-sm">當您按下註冊，即代表您同意我們的<a href="" class="text-orange-400">使用政策與隱私權條款</a></div>-->
         <div>
-            <button class="full-button bg-orange-400 text-white" @click="submitAll">註冊</button>
+            <button class="full-button bg-orange-400 text-white" @click="submitAll">註冊 Signup</button>
         </div>
     </div>
 </template>
@@ -120,9 +120,9 @@ export default defineComponent({
                 for (const error of Object.entries(item[1])) {
                     if (error[1] === false) {
                         if (error[0] === 'filled') {
-                            qd.Alert('請確認所有欄位皆已填寫');
+                            qd.Alert('請確認所有欄位皆已填寫 Please fill in all required fields.');
                         } else {
-                            qd.Alert('請確認輸入的內容');
+                            qd.Alert('請確認輸入的內容 Please check your input data.');
                         }
                         return;
                     }
@@ -132,7 +132,7 @@ export default defineComponent({
             delete temp.password_confirm;
             qf.Url('auth/user/register').Post(temp).then((res: any) => {
                 if (res.message === 'done') {
-                    qd.Alert('註冊成功');
+                    qd.Alert('註冊成功 Done');
                     context.emit('refresh');
                     context.emit('close_modal');
                     data.account = '';

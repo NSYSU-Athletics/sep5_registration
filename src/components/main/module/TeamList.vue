@@ -1,9 +1,15 @@
 <template>
     <div>
         <div class="new-team">
-            <div>隊伍名稱：</div>
+            <div>
+                <template v-if="language=='ch'">新增隊伍：</template>
+                <template v-if="language=='en'">New Team : </template>
+            </div>
             <input type="text" class="flex-grow block" v-model="data.team_name">
-            <button class="block button" @click="submitAll">新增</button>
+            <button class="block button" @click="submitAll">
+                <template v-if="language=='ch'">新增</template>
+                <template v-if="language=='en'">Add</template>
+            </button>
         </div>
         <hr>
         <div>
@@ -12,14 +18,20 @@
                     <div class="flex-grow">
                         <div>{{item.team_name}}</div>
                         <div class="flex gap-3 items-center">
-                            <div>成員：</div>
+                            <div>
+                                <template v-if="language=='ch'">成員</template>
+                                <template v-if="language=='en'">Member</template>
+                            </div>
                             <template v-for="(member, index) in item.member_data_list" :key="index">
                                 <div class="border-2 rounded px-1 py-0.5">{{member.name}}</div>
                             </template>
-                            <div v-if="item.member_list.length == 0">目前還沒有成員</div>
+                            <div v-if="item.member_list.length == 0">目前還沒有成員 No any member.</div>
                         </div>
                     </div>
-                    <button class="button block" @click="openTeam(item)">編輯</button>
+                    <button class="button block" @click="openTeam(item)">
+                        <template v-if="language=='ch'">編輯</template>
+                        <template v-if="language=='en'">Edit</template>
+                    </button>
                 </div>
             </template>
         </div>
@@ -27,7 +39,10 @@
     <SmallModal v-show="displayModal>0" @close_modal="displayModal=0">
         <template v-slot:title>
             <div class="text-2xl">
-                <div v-if="displayModal==1">編輯成員</div>
+                <div v-if="displayModal==1">
+                    <template v-if="language=='ch'">編輯成員</template>
+                    <template v-if="language=='en'">Edit Member</template>
+                </div>
             </div>
         </template>
         <template v-slot:content>
@@ -121,6 +136,7 @@ export default defineComponent({
             },
             teamData,
             getTeamList,
+            language: computed(() => store.state.language),
         };
     },
     components: {

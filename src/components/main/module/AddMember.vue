@@ -1,72 +1,106 @@
 <template>
     <div>
-        <div class="text-lg p-1">隊名：{{team.team_name}}</div>
+        <div class="text-lg p-1">
+            <template v-if="language=='ch'">隊名：</template>
+            <template v-if="language=='en'">Team Name : </template>
+            {{team.team_name}}
+        </div>
         <hr>
         <div class="p-1 text-lg">新增成員</div>
         <table class="athlete-table">
             <tr>
-                <td>是否為大專<br>院校學生</td>
+                <td>
+                    <template v-if="language=='ch'">是否為大專<br>院校學生</template>
+                    <template v-if="language=='en'">University<br>Student</template>
+                </td>
                 <td colspan="3">
                     <label>
                         <input type="radio" value="1" :disabled="lockList.student" v-model="student">
-                        <span>是</span>
+                        <span>
+                            <template v-if="language=='ch'">是</template>
+                            <template v-if="language=='en'">Yes</template>
+                        </span>
                     </label>
                     <label>
                         <input type="radio" value="0" :disabled="lockList.student" v-model="student">
-                        <span>否</span>
+                        <span>
+                            <template v-if="language=='ch'">否</template>
+                            <template v-if="language=='en'">No</template>
+                        </span>
                     </label>
                 </td>
             </tr>
             <tr>
-                <td>所屬單位</td>
+                <td>
+                    <template v-if="language=='ch'">所屬單位</template>
+                    <template v-if="language=='en'">Organization</template>
+                </td>
                 <td colspan="3">
                     <div v-if="student==1">
-                        <div>學校</div>
+                        <div>
+                            <template v-if="language=='ch'">學校</template>
+                            <template v-if="language=='en'">University</template>
+                        </div>
                         <v-select class="cursor-pointer" :disabled="lockList.org_id" :clearable="false" :options="univList" :reduce="university => university.univ_id" v-model="orgId" @input="resetSelect">
                             <template v-slot:no-options="{ search, searching }">
-                                <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
-                                <div v-else class="opacity-50">請輸入或選擇學校</div>
+                                <template v-if="searching">找不到 <em>{{ search }}</em> Not found</template>
+                                <div v-else class="opacity-50">請輸入或選擇學校 Please select your university.</div>
                             </template>
                         </v-select>
-                        <div>系所</div>
+                        <div>
+                            <template v-if="language=='ch'">系所</template>
+                            <template v-if="language=='en'">Depratment</template>
+                        </div>
                         <div v-if="deptList.length>0">
                             <v-select class="cursor-pointer" :disabled="lockList.dept_id" :clearable="false" :options="deptList" :reduce="department => department.dept_id" v-model="deptId" label="label">
                                 <template v-slot:no-options="{ search, searching }">
-                                    <template v-if="searching">找不到 <em>{{ search }}</em>。
+                                    <template v-if="searching">找不到 <em>{{ search }}</em> Not found
                                     </template>
-                                    <div v-else-if="orgId.length > 0" class="opacity-50">載入中</div>
-                                <div v-else class="opacity-50">請選擇學校</div>
+                                    <div v-else-if="orgId.length > 0" class="opacity-50">載入中 Loading</div>
+                                <div v-else class="opacity-50">請選擇學校 Please select your university.</div>
                                 </template>
                             </v-select>
                         </div>
                     </div>
                     <div v-if="student==0">
-                        <div>團體</div>
+                        <div>
+                            <template v-if="language=='ch'">團體</template>
+                            <template v-if="language=='en'">Organization Name</template>
+                        </div>
                         <v-select class="cursor-pointer" :disabled="lockList.org_id" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="orgId" label="name_ch_full">
                             <template v-slot:no-options="{ search, searching }">
-                                <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
-                                <div v-else class="opacity-50">請輸入或選擇團體</div>
+                                <template v-if="searching">找不到 <em>{{ search }}</em> Not found</template>
+                                <div v-else class="opacity-50">請輸入或選擇團體 Please select your organization.</div>
                             </template>
                         </v-select>
                     </div>
                 </td>
             </tr>
             <tr>
-                <td>選手</td>
+                <td>
+                    <template v-if="language=='ch'">選手</template>
+                    <template v-if="language=='en'">Athlete</template>
+                </td>
                 <td colspan="3">
                     <v-select class="cursor-pointer" :clearable="false" :options="athleteList" :reduce="athlete => athlete.athlete_id" v-model="athleteId" label="name">
                         <template v-slot:no-options="{ search, searching }">
-                            <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
-                            <div v-else class="opacity-50">請輸入或選擇選手</div>
+                            <template v-if="searching">找不到 <em>{{ search }}</em> Not found</template>
+                            <div v-else class="opacity-50">請輸入或選擇選手 Please seletct an athlete.</div>
                         </template>
                     </v-select>
                 </td>
             </tr>
         </table>
         <div class="my-1 text-right">
-            <button class="button" @click="addMember">加入</button>
+            <button class="button" @click="addMember">
+                <template v-if="language=='ch'">加入</template>
+                <template v-if="language=='en'">Add</template>
+            </button>
         </div>
-        <div class="mx-1 my-2">成員名單：</div>
+        <div class="mx-1 my-2">
+            <template v-if="language=='ch'">成員名單：</template>
+            <template v-if="language=='en'">Member : </template>
+        </div>
         <hr>
         <table class="athlete-table">
             <template v-for="(item, index) in athleteList" :key="index">
@@ -75,24 +109,36 @@
                     <td class="w-[30%] truncate max-w-0">{{item.dept_ch}}</td>
                     <td class="w-[20%] truncate max-w-0">{{item.name}}</td>
                     <td class="w-[5%] truncate max-w-0">
-                        <span v-if="item.sex==1">男</span>
-                        <span v-else>女</span>
+                        <span v-if="item.sex==1">
+                            <template v-if="language=='ch'">男</template>
+                            <template v-if="language=='en'">Men</template>
+                        </span>
+                        <span v-else>
+                            <template v-if="language=='ch'">女</template>
+                            <template v-if="language=='en'">Women</template>
+                        </span>
                     </td>
                     <td class="w-[15%] truncate max-w-0 text-right">
-                        <button class="button button-red block" @click="data.splice(data.indexOf(item.athlete_id),1)">刪除</button>
+                        <button class="button button-red block" @click="data.splice(data.indexOf(item.athlete_id),1)">
+                            <template v-if="language=='ch'">刪除</template>
+                            <template v-if="language=='en'">Delete</template>
+                        </button>
                     </td>
                 </tr>
             </template>
         </table>
         <div class="my-1">
-            <button class="button w-full" @click="submitAll">儲存</button>
+            <button class="button w-full" @click="submitAll">
+                <template v-if="language=='ch'">儲存</template>
+                <template v-if="language=='en'">Save</template>
+            </button>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import {
-    defineComponent, reactive, ref, watch,
+    defineComponent, reactive, ref, watch, computed,
 } from 'vue';
 import { QuickData, QuickFetch } from '@/quick';
 import { useRoute } from 'vue-router';
@@ -215,7 +261,7 @@ export default defineComponent({
         function submitAll() {
             qf.Url(`register/grp/team/member/${gameData.value.type}/${gameData.value.game_id}`).Patch(team.value.team_id, { member_list: JSON.stringify(data) }).then((res: any) => {
                 if (res.message === 'done') {
-                    qd.Alert('編輯成功');
+                    qd.Alert('編輯成功 Done');
                     context.emit('refresh');
                     context.emit('close_modal');
                 }
@@ -243,13 +289,14 @@ export default defineComponent({
             submitAll,
             addMember: () => {
                 if (athleteId.value === '') {
-                    qd.Alert('請先選擇選手');
+                    qd.Alert('請先選擇選手 Please select an athlete first.');
                 } else if (data.includes(athleteId.value)) {
-                    qd.Alert('此選手已加入');
+                    qd.Alert('此選手已加入 This athlete has been added.');
                 } else {
                     data.push(athleteId.value);
                 }
             },
+            language: computed(() => useStore().state.language),
         };
     },
     components: {

@@ -2,62 +2,92 @@
     <div>
         <table class="athlete-table">
             <tr>
-                <td class="w-[20%]">身分證字號*</td>
+                <td class="w-[20%]">
+                    <template v-if="language=='ch'">身分證字號*</template>
+                    <template v-if="language=='en'">ARC/Unified ID*</template>
+                </td>
                 <td class="w-[80%]">
                     <input type="text" maxlength="10" v-model="data.unified_id" @blur="exist">
-                    <div v-if="data.unified_id.length>0 && !errorList.unified_id.unique" class="warning">身分證字號已存在</div>
+                    <div v-if="data.unified_id.length>0 && !errorList.unified_id.unique" class="warning">身分證字號已存在 ARC/Unified ID has been taken.</div>
                 </td>
             </tr>
             <tr>
-                <td>姓名*</td>
+                <td>
+                    <template v-if="language=='ch'">姓名*</template>
+                    <template v-if="language=='en'">Name*</template>
+                </td>
                 <td>
                     <input type="text" v-model="data.name">
                 </td>
             </tr>
             <tr>
-                <td>性別*</td>
+                <td>
+                    <template v-if="language=='ch'">性別*</template>
+                    <template v-if="language=='en'">Sex*</template>
+                </td>
                 <td>
                     <select v-model="data.sex">
-                        <option value="1">生理男</option>
-                        <option value="2">生理女</option>
+                        <option value="1">
+                            <template v-if="language=='ch'">生理男</template>
+                            <template v-if="language=='en'">Male</template>
+                        </option>
+                        <option value="2">
+                            <template v-if="language=='ch'">生理女</template>
+                            <template v-if="language=='en'">Female</template>
+                        </option>
                     </select>
                 </td>
             </tr>
-            <tr>
-                <td>是否為大專<br>院校學生*</td>
+            <tr v-if="data.org_id!='O0000'">
+                <td>
+                    <template v-if="language=='ch'">是否為大專<br>院校學生*</template>
+                    <template v-if="language=='en'">University<br>Student*</template>
+                </td>
                 <td>
                     <label>
                         <input type="radio" value="1" :disabled="lockList.student" v-model="data.student" @change="changeOrg(1)">
-                        <span>是</span>
+                        <span>
+                            <template v-if="language=='ch'">是</template>
+                            <template v-if="language=='en'">Yes</template>
+                        </span>
                     </label>
                     <label>
                         <input type="radio" value="0" :disabled="lockList.student" v-model="data.student" @change="changeOrg(0)">
-                        <span>否</span>
+                        <span>
+                            <template v-if="language=='ch'">否</template>
+                            <template v-if="language=='en'">No</template>
+                        </span>
                     </label>
                 </td>
             </tr>
             <template v-if="data.student==1">
                 <tr>
-                    <td>學校*</td>
+                    <td>
+                        <template v-if="language=='ch'">學校*</template>
+                        <template v-if="language=='en'">University*</template>
+                    </td>
                     <td>
                         <v-select class="cursor-pointer" :disabled="lockList.org_id" :clearable="false" :options="univList" :reduce="university => university.univ_id" v-model="data.org_id" @input="resetSelect">
                             <template v-slot:no-options="{ search, searching }">
-                                <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
-                                <div v-else class="opacity-50">請輸入或選擇學校</div>
+                                <template v-if="searching">找不到 <em>{{ search }}</em> Not found</template>
+                                <div v-else class="opacity-50">請輸入或選擇學校 Please select your university.</div>
                             </template>
                         </v-select>
                     </td>
                 </tr>
                 <tr>
-                    <td>系所</td>
+                    <td>
+                        <template v-if="language=='ch'">系所</template>
+                        <template v-if="language=='en'">Department</template>
+                    </td>
                     <td>
                         <div v-if="deptList.length>0">
                             <v-select class="cursor-pointer" :disabled="lockList.dept_id" :clearable="false" :options="deptList" :reduce="department => department.dept_id" v-model="data.dept_id" label="label">
                                 <template v-slot:no-options="{ search, searching }">
-                                    <template v-if="searching">找不到 <em>{{ search }}</em>。
+                                    <template v-if="searching">找不到 <em>{{ search }}</em> Not found
                                     </template>
-                                    <div v-else-if="data.org_id.length > 0" class="opacity-50">載入中</div>
-                                <div v-else class="opacity-50">請選擇學校</div>
+                                    <div v-else-if="data.org_id.length > 0" class="opacity-50">載入中 Loading</div>
+                                <div v-else class="opacity-50">請選擇學校 Please select your university.</div>
                                 </template>
                             </v-select>
                         </div>
@@ -65,58 +95,83 @@
                 </tr>
             </template>
             <template v-else>
-                <tr>
-                    <td>團體*</td>
+                <tr v-if="data.org_id!='O0000'">
+                    <td>
+                        <template v-if="language=='ch'">團體*</template>
+                        <template v-if="language=='en'">Organization*</template>
+                    </td>
                     <td>
                         <v-select class="cursor-pointer" :disabled="lockList.org_id" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="data.org_id" label="name_ch_full">
                             <template v-slot:no-options="{ search, searching }">
-                                <template v-if="searching">找不到 <em>{{ search }}</em>。</template>
-                                <div v-else class="opacity-50">請輸入或選擇團體</div>
+                                <template v-if="searching">找不到 <em>{{ search }}</em> Not found</template>
+                                <div v-else class="opacity-50">請輸入或選擇團體 Please select your organization.</div>
                             </template>
                         </v-select>
                     </td>
                 </tr>
             </template>
-            <tr>
-                <td>身份*</td>
+            <tr v-if="data.org_id!='O0000'">
+                <td>
+                    <template v-if="language=='ch'">身份*</template>
+                    <template v-if="language=='en'">Identity*</template>
+                </td>
                 <td>
                     <select v-model="data.role">
-                        <option value="0">隊員</option>
-                        <option value="1">隊長</option>
+                        <option value="0">
+                            <template v-if="language=='ch'">隊員</template>
+                            <template v-if="language=='en'">Member</template>
+                        </option>
+                        <option value="1">
+                            <template v-if="language=='ch'">隊長</template>
+                            <template v-if="language=='en'">Captain</template>
+                        </option>
                     </select>
                 </td>
             </tr>
             <tr v-if="data.student==1">
-                <td>學號</td>
+                <td>
+                    <template v-if="language=='ch'">學號</template>
+                    <template v-if="language=='en'">School ID</template>
+                </td>
                 <td>
                     <input type="text" v-model="data.student_id">
                 </td>
             </tr>
             <tr>
-                <td>生日*</td>
+                <td>
+                    <template v-if="language=='ch'">生日*</template>
+                    <template v-if="language=='en'">Birthday</template>
+                </td>
                 <td>
                     <input type="date" v-model="data.birthday">
                 </td>
             </tr>
             <tr>
-                <td>手機</td>
+                <td>
+                    <template v-if="language=='ch'">手機</template>
+                    <template v-if="language=='en'">Phone (TW)</template>
+                </td>
                 <td>
                     <input type="text" v-model="data.phone">
                 </td>
             </tr>
         </table>
         <div class="text-right">
-            <button class="button" @click="submitAll">新增</button>
+            <button class="button" @click="submitAll">
+                <template v-if="language=='ch'">新增</template>
+                <template v-if="language=='en'">Add</template>
+            </button>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import {
-    defineComponent, ref, reactive, watch,
+    defineComponent, ref, reactive, watch, computed,
 } from 'vue';
 import { QuickData, QuickFetch } from '@/quick';
 import vSelect from 'vue-select';
+import { useStore } from 'vuex';
 import 'vue-select/dist/vue-select.css';
 
 export default defineComponent({
@@ -231,9 +286,9 @@ export default defineComponent({
                 for (const error of Object.entries(item[1])) {
                     if (error[1] === false) {
                         if (error[0] === 'filled') {
-                            qd.Alert('請確認所有欄位皆已填寫');
+                            qd.Alert('請確認所有欄位皆已填寫 Please fill in all required fields.');
                         } else {
-                            qd.Alert('請確認輸入的內容');
+                            qd.Alert('請確認輸入的內容 Please check your input data.');
                         }
                         return;
                     }
@@ -242,7 +297,7 @@ export default defineComponent({
             const temp: any = JSON.parse(JSON.stringify(data));
             qf.Url('athlete/add').Post(temp).then((res: any) => {
                 if (res.message === 'done') {
-                    qd.Alert('新增成功');
+                    qd.Alert('新增成功 Done');
                     context.emit('refresh');
                     context.emit('close_modal');
                     data.unified_id = '';
@@ -274,6 +329,7 @@ export default defineComponent({
                     data.org_id = '';
                 }
             },
+            language: computed(() => useStore().state.language),
         };
     },
     components: {

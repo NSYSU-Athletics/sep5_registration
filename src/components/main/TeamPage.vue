@@ -1,23 +1,38 @@
 <template>
     <div class="mx-auto w-full p-5 sm:w-11/12 md:w-4/5 lg:w-2/3 xl:w-1/2">
         <div class="box-section">
-            <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">回上頁</div>
+            <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">
+                <template v-if="language=='ch'">回上頁</template>
+                <template v-if="language=='en'">Back</template>
+            </div>
         </div>
         <div class="box-section">
-            <div class="title">功能選單</div>
+            <div class="title">
+                <template v-if="language=='ch'">功能選單</template>
+                <template v-if="language=='en'">Actions</template>
+            </div>
             <hr>
             <button class="arrow-button bg-orange-400" @click="displayModal=1">
-                <span>隊伍管理</span>
+                <span>
+                    <template v-if="language=='ch'">隊伍管理</template>
+                    <template v-if="language=='en'">Team Data</template>
+                </span>
             </button>
             <button class="arrow-button bg-orange-400" @click="$router.push(`/register/${$route.params.game_id}/group`)">
-                <span>隊伍報名</span>
+                <span>
+                    <template v-if="language=='ch'">隊伍報名</template>
+                    <template v-if="language=='en'">Register</template>
+                </span>
             </button>
         </div>
     </div>
     <SmallModal v-show="displayModal>0" @close_modal="displayModal=0">
         <template v-slot:title>
             <div class="text-2xl">
-                <div v-if="displayModal==1">隊伍管理</div>
+                <div v-if="displayModal==1">
+                    <template v-if="language=='ch'">隊伍管理</template>
+                    <template v-if="language=='en'">Team Data</template>
+                </div>
             </div>
         </template>
         <template v-slot:content>
@@ -28,7 +43,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
+import { useStore } from 'vuex';
 import SmallModal from '@/components/SmallModal.vue';
 import TeamList from '@/components/main/module/TeamList.vue';
 
@@ -37,6 +53,7 @@ export default defineComponent({
         const displayModal = ref(0);
         return {
             displayModal,
+            language: computed(() => useStore().state.language),
         };
     },
     components: {

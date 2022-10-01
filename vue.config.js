@@ -3,7 +3,7 @@ const { defineConfig } = require('@vue/cli-service');
 module.exports = defineConfig({
     transpileDependencies: true,
     publicPath: '/registration',
-    outputDir: 'index',
+    outputDir: 'registration',
     assetsDir: 'static',
     pwa: {
         iconPaths: {

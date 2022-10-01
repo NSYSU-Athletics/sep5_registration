@@ -6,6 +6,7 @@ export default createStore({
         confirmBox: '',
         confirmAnswer: '',
         gameId: '',
+        language: 'ch',
     },
     getters: {
     },
@@ -21,6 +22,9 @@ export default createStore({
         },
         setGameId(state, data) {
             state.gameId = data;
+        },
+        setLanguage(state, data) {
+            state.language = data;
         },
     },
     actions: {

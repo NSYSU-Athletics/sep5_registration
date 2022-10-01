@@ -1,19 +1,31 @@
 <template>
     <div>
-        <div class="text-gray-400">系所管理員僅可編輯本系選手</div>
+        <div class="text-gray-400">
+            <template v-if="language=='ch'">系所管理員僅可編輯本系選手</template>
+            <template v-if="language=='en'">User with departmental permission can only edit their athletes' data.</template>
+        </div>
         <table class="athlete-table">
             <tr>
-                <td class="w-[20%]">身分證字號</td>
+                <td class="w-[20%]">
+                    <template v-if="language=='ch'">身分證字號*</template>
+                    <template v-if="language=='en'">ARC/Unified ID*</template>
+                </td>
                 <td class="w-[80%]">{{data.unified_id}}</td>
             </tr>
             <tr>
-                <td>姓名*</td>
+                <td>
+                    <template v-if="language=='ch'">姓名*</template>
+                    <template v-if="language=='en'">Name*</template>
+                </td>
                 <td>
                     <input :readonly="!isEdit" type="text" v-model="data.name">
                 </td>
             </tr>
             <tr>
-                <td>性別*</td>
+                <td>
+                    <template v-if="language=='ch'">性別*</template>
+                    <template v-if="language=='en'">Sex*</template>
+                </td>
                 <td>
                     <select :disabled="!isEdit" v-model="data.sex">
                         <option value="1">生理男</option>
@@ -21,8 +33,11 @@
                     </select>
                 </td>
             </tr>
-            <tr>
-                <td>是否為大專<br>院校學生*</td>
+            <tr v-if="data.org_id!='O0000'">
+                <td>
+                    <template v-if="language=='ch'">是否為大專<br>院校學生*</template>
+                    <template v-if="language=='en'">University<br>Student*</template>
+                </td>
                 <td>
                     <label>
                         <input type="radio" value="1" :disabled="lockList.student || (!isEdit)" v-model="data.student" @change="changeOrg(1)">
@@ -37,7 +52,10 @@
             <!--1-->
             <template v-if="data.student==1">
                 <tr>
-                    <td>主要學校*</td>
+                    <td>
+                        <template v-if="language=='ch'">主要學校*</template>
+                        <template v-if="language=='en'">Primary<br>University*</template>
+                    </td>
                     <td>
                         <v-select class="cursor-pointer" :disabled="lockList.org_id || (!isEdit)" :clearable="false" :options="univList" :reduce="university => university.univ_id" v-model="data.org_id" @input="resetSelect">
                             <template v-slot:no-options="{ search, searching }">
@@ -48,7 +66,10 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>主要系所</td>
+                    <td>
+                        <template v-if="language=='ch'">主要系所</template>
+                        <template v-if="language=='en'">Primary<br>Department</template>
+                    </td>
                     <td>
                         <div v-if="deptList.length>0">
                             <v-select class="cursor-pointer" :disabled="lockList.dept_id || (!isEdit)" :clearable="false" :options="deptList" :reduce="department => department.dept_id" v-model="data.dept_id" label="label">
@@ -64,8 +85,11 @@
                 </tr>
             </template>
             <template v-else>
-                <tr>
-                    <td>主要團體*</td>
+                <tr v-if="data.org_id!='O0000'">
+                    <td>
+                        <template v-if="language=='ch'">主要團體*</template>
+                        <template v-if="language=='en'">Primary<br>Organization*</template>
+                    </td>
                     <td>
                         <v-select class="cursor-pointer" :disabled="lockList.org_id || (!isEdit)" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="data.org_id" label="name_ch_full">
                             <template v-slot:no-options="{ search, searching }">
@@ -79,7 +103,10 @@
             <!--2-->
             <template v-if="data.student==1">
                 <tr>
-                    <td>兼任學校</td>
+                    <td>
+                        <template v-if="language=='ch'">兼任學校</template>
+                        <template v-if="language=='en'">Secondary<br>University</template>
+                    </td>
                     <td>
                         <v-select class="cursor-pointer" :disabled="lockList.sec_org_id || (!isEdit)" :clearable="false" :options="univList" :reduce="university => university.univ_id" v-model="data.sec_org_id" @input="resetSelectSec">
                             <template v-slot:no-options="{ search, searching }">
@@ -90,7 +117,10 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>兼任系所</td>
+                    <td>
+                        <template v-if="language=='ch'">兼任系所</template>
+                        <template v-if="language=='en'">Secondary<br>Department</template>
+                    </td>
                     <td>
                         <div v-if="deptList.length>0">
                             <v-select class="cursor-pointer" :disabled="lockList.sec_dept_id || (!isEdit)" :clearable="false" :options="deptList" :reduce="department => department.dept_id" v-model="data.sec_dept_id" label="label">
@@ -106,8 +136,11 @@
                 </tr>
             </template>
             <template v-else>
-                <tr>
-                    <td>兼任團體</td>
+                <tr v-if="data.org_id!='O0000'">
+                    <td>
+                        <template v-if="language=='ch'">兼任團體</template>
+                        <template v-if="language=='en'">Secondary<br>Organization</template>
+                    </td>
                     <td>
                         <v-select class="cursor-pointer" :disabled="lockList.sec_org_id || (!isEdit)" :clearable="false" :options="orgList" :reduce="org => org.org_id" v-model="data.sec_org_id" label="name_ch_full">
                             <template v-slot:no-options="{ search, searching }">
@@ -119,37 +152,64 @@
                 </tr>
             </template>
             <tr>
-                <td>身份*</td>
                 <td>
-                    <select :disabled="!isEdit" v-model="data.role">
-                        <option value="0">隊員</option>
-                        <option value="1">隊長</option>
+                    <template v-if="language=='ch'">身份*</template>
+                    <template v-if="language=='en'">Identity*</template>
+                </td>
+                <td>
+                    <select v-model="data.role">
+                        <option value="0">
+                            <template v-if="language=='ch'">隊員</template>
+                            <template v-if="language=='en'">Member</template>
+                        </option>
+                        <option value="1">
+                            <template v-if="language=='ch'">隊長</template>
+                            <template v-if="language=='en'">Captain</template>
+                        </option>
                     </select>
                 </td>
             </tr>
             <tr v-if="data.student==1">
-                <td>學號</td>
+                <td>
+                    <template v-if="language=='ch'">學號</template>
+                    <template v-if="language=='en'">School ID</template>
+                </td>
                 <td>
                     <input type="text" :readonly="!isEdit" v-model="data.student_id">
                 </td>
             </tr>
             <tr>
-                <td>生日*</td>
+                <td>
+                    <template v-if="language=='ch'">生日*</template>
+                    <template v-if="language=='en'">Birthday</template>
+                </td>
                 <td>
                     <input type="date" :readonly="!isEdit" v-model="data.birthday">
                 </td>
             </tr>
             <tr>
-                <td>手機</td>
+                <td>
+                    <template v-if="language=='ch'">手機</template>
+                    <template v-if="language=='en'">Phone (TW)</template>
+                </td>
                 <td>
                     <input type="text" :readonly="!isEdit" v-model="data.phone">
                 </td>
             </tr>
         </table>
         <div class="text-right" v-if="editType!='lookup'">
-            <button v-if="isEdit" class="button button-red" @click="deleteAll">刪除</button>
-            <button v-if="isEdit" class="button" @click="submitAll">儲存</button>
-            <button v-else class="button" @click="isEdit = true">編輯</button>
+            <button v-if="isEdit" class="button button-red" @click="deleteAll">
+                <template v-if="language=='ch'">刪除</template>
+                <template v-if="language=='en'">Delete</template>
+            </button>
+            <button v-if="isEdit" class="button" @click="submitAll">
+                <template v-if="language=='ch'">儲存</template>
+                <template v-if="language=='en'">Save</template>
+            </button>
+            <button v-else class="button" @click="isEdit = true">
+                <template v-if="language=='ch'">編輯</template>
+                <template v-if="language=='en'">Edit</template>
+            </button>
         </div>
     </div>
 </template>
@@ -350,6 +410,7 @@ export default defineComponent({
             },
             isEdit,
             displayType,
+            language: computed(() => useStore().state.language),
         };
     },
     components: {

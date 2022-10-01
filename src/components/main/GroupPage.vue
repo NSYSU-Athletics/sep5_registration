@@ -1,14 +1,23 @@
 <template>
     <div class="mx-auto w-full p-5 sm:w-11/12 md:w-4/5 lg:w-2/3 xl:w-1/2">
         <div class="box-section">
-            <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">回上頁</div>
+            <div class="text-xl text-gray-400 cursor-pointer" @click="$router.go(-1)">
+                <template v-if="language=='ch'">回上頁</template>
+                <template v-if="language=='en'">Back</template>
+            </div>
         </div>
         <div class="box-section">
-            <div class="title">隊伍報名</div>
+            <div class="title">
+                <template v-if="language=='ch'">隊伍報名</template>
+                <template v-if="language=='en'">Group events</template>
+            </div>
             <hr>
             <table class="athlete-table">
                 <tr>
-                    <td>隊名</td>
+                    <td>
+                        <template v-if="language=='ch'">隊名</template>
+                        <template v-if="language=='en'">Team Name</template>
+                    </td>
                     <td colspan="3">
                         <select v-model="data.team_id">
                             <template v-for="(item, index) in teamList" :key="index">
@@ -18,7 +27,10 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>報名組別</td>
+                    <td>
+                        <template v-if="language=='ch'">報名組別</template>
+                        <template v-if="language=='en'">Division</template>
+                    </td>
                     <td>
                         <select v-model="data.game_division_id">
                             <template v-for="(item, index) in divisionList" :key="index">
@@ -26,28 +38,46 @@
                             </template>
                         </select>
                     </td>
-                    <td>報名項目</td>
+                    <td>
+                        <template v-if="language=='ch'">報名項目</template>
+                        <template v-if="language=='en'">Event</template>
+                    </td>
                     <td>
                         <select v-model="data.event_id">
                             <template v-for="(item, index) in paramsList" :key="index">
-                                <option v-if="item.multiple == 1 && item.game_division_id == data.game_division_id" :value="item.event_id">{{item.event_ch}}</option>
+                                <option v-if="item.multiple == 1 && item.game_division_id == data.game_division_id" :value="item.event_id">{{item[`event_${language}`]}}</option>
                             </template>
                         </select>
                     </td>
                 </tr>
             </table>
             <div class="text-right">
-                <button class="button" @click="submitAll">新增</button>
+                <button class="button" @click="submitAll">
+                    <template v-if="language=='ch'">新增</template>
+                    <template v-if="language=='en'">Add</template>
+                </button>
             </div>
         </div>
         <div class="box-section">
-            <div class="title">報名內容</div>
+            <div class="title">
+                <template v-if="language=='ch'">報名項目</template>
+                <template v-if="language=='en'">Registered</template>
+            </div>
             <hr>
             <table class="register-table">
                 <tr>
-                    <th>隊名</th>
-                    <th>組別</th>
-                    <th>項目</th>
+                    <th>
+                        <template v-if="language=='ch'">隊伍</template>
+                        <template v-if="language=='en'">Team</template>
+                    </th>
+                    <th>
+                        <template v-if="language=='ch'">組別</template>
+                        <template v-if="language=='en'">Division</template>
+                    </th>
+                    <th>
+                        <template v-if="language=='ch'">項目</template>
+                        <template v-if="language=='en'">Event</template>
+                    </th>
                     <th></th>
                 </tr>
                 <template v-for="(item, index) in registerList" :key="index">
@@ -56,7 +86,10 @@
                         <td>{{item.ch}}</td>
                         <td>{{item.event_ch}}</td>
                         <td>
-                            <button class="button button-red" @click="remove(item)">刪除</button>
+                            <button class="button button-red" @click="remove(item)">
+                                <template v-if="language=='ch'">刪除</template>
+                                <template v-if="language=='en'">Delete</template>
+                            </button>
                         </td>
                     </tr>
                     <!--
@@ -229,6 +262,7 @@ export default defineComponent({
             },
             remove,
             submitAll,
+            language: computed(() => useStore().state.language),
         };
     },
 });

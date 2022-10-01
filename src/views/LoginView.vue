@@ -34,6 +34,7 @@
             <div class="mt-2">
                 <a class="text-orange-400 block mr-3 text-sm" href="">忘記密碼 Forgot Password</a>
                 <div class="text-sm">賽事問題請洽各承辦單位，系統操作問題請洽<a class="text-orange-400" href="https://www.facebook.com/NSYSUAthletics" target="_blank">中山田徑</a></div>
+                <div class="text-sm">If you encounter any technical issues, please contact <a class="text-orange-400" href="https://www.facebook.com/NSYSUAthletics" target="_blank">NSYSU Athletics</a>. Other questions, such as game details, please contact the orgznizer.</div>
             </div>
         </div>
         <div v-else class="p-5 bg-white w-11/12 sm:w-96 mx-auto shadow text-gray-700 rounded">
@@ -56,13 +57,13 @@
         </template>
         <template v-slot:content>
             <div class="flex items-center mb-3">
-                <div class="text-gray-600">請選擇註冊身份別：</div>
-                <select class="block flex-grow border-2 rounded px-1 py-0.5" v-model="identity">
-                    <option value="" disabled selected>請選擇身份別</option>
-                    <option value="idv">個人報名(公開組)</option>
+                <div class="text-gray-600">請選擇註冊身份別 Identity：</div>
+                <select class="block flex-grow border-2 rounded px-1 py-0.5 w-full" v-model="identity">
+                    <option value="" disabled selected>請選擇身份別 Please select your identity</option>
+                    <option value="idv">個人報名 Individual</option>
                     <!--<option value="stu">中山學生(新生盃、田徑新生組)</option>-->
-                    <option value="stu">大專院校(大專組)</option>
-                    <option value="grp">一般單位(公開組)</option>
+                    <option value="stu">大專院校 University</option>
+                    <option value="grp">一般單位 Organization</option>
                 </select>
             </div>
             <div v-show="identity!=''" class="border-2 rounded p-3">
@@ -98,9 +99,9 @@ export default defineComponent({
         qf.Url('reg-system').GetNoH(regSystem);
         function submitAll(): any {
             if (account.value.length === 0) {
-                qd.Alert('請輸入帳號');
+                qd.Alert('請輸入帳號 Account required');
             } else if (password.value.length === 0) {
-                qd.Alert('請輸入密碼');
+                qd.Alert('請輸入密碼 Password required');
             } else {
                 qf.Dataset().AddObj('account', account).AddObj('password', password);
                 qf.Url('auth/user/login').Post(qf.GetDset()).then((res: any) => {
@@ -110,11 +111,11 @@ export default defineComponent({
                         localStorage.sep5_reg_data = JSON.stringify(res.data.user);
                         localStorage.sep5_reg_token = res.data.token;
                     } else if (res.message === 'wrong_password') {
-                        qd.Alert('密碼錯誤');
+                        qd.Alert('密碼錯誤 Wrong Password');
                     } else if (res.message === 'account_not_exist') {
-                        qd.Alert('帳號不存在');
+                        qd.Alert('帳號不存在 Account not exist');
                     } else if (res.message === 'not_verified') {
-                        qd.Alert('帳號尚未通過審核');
+                        qd.Alert('帳號尚未通過審核 Account have not been verified yet.');
                     }
                     account.value = '';
                     password.value = '';
